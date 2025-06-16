@@ -76,7 +76,7 @@ class User(AbstractUser):
         ordering = ['-date_joined']
 
     def __str__(self):
-        return f'{self.full_name.split(' ')[0]} ({self.email})'
+        return f"{self.full_name.split(' ')[0]} ({self.email})"
 
 
 class Driver(models.Model):

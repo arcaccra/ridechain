@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+	Login
+{% endblock %}
+
+{% block custom-css %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block content %}
+<main>
+  <section class="w-screen h-screen flex flex-col md:flex-row">
+    <!-- Left: Image -->
+    <div class="hidden w-full h-full md:block md:w-1/2 relative flex items-center justify-center">
+      <div class="wavy-circle relative">
+        <img src="https://images.pexels.com/photos/6817004/pexels-photo-6817004.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+             alt="Login Background"
+             class="w-full h-full object-cover object-center rounded-full">
+      </div>
+        <!-- Top-left circle with lock icon -->
+        <div class="absolute top-[25%] left-[20%] w-20 h-20 bg-purple-600 rounded-full flex items-center justify-center shadow-lg">
+          <span class="material-symbols-outlined text-white text-xl">lock</span>
+        </div>
+        <!-- Bottom-right circle with person icon -->
+        <div class="absolute bottom-[20%] right-[30%] w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
+          <span class="material-symbols-outlined text-white text-xl">person</span>
+        </div>
+        <!-- Center-right circle with email icon -->
+        <div class="absolute top-[50%] right-[7%] transform -translate-y-1/2 w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center">
+          <span class="material-symbols-outlined text-white text-lg">email</span>
+        </div>
+    </div>
+    <!-- Right: Form -->
+    <div class="w-full md:w-1/2 flex items-center justify-center bg-white/20">
+      <div class="max-w-md w-full p-8 rounded-2xl bg-white/80 backdrop-blur-sm">
+        <h2 class="text-4xl header-font font-semibold purple-text mb-8">Login</h2>
+        <form method="post" action="{% url 'login' %}" class="space-y-6">
+          {% csrf_token %}
+          <!-- Email Field -->
+          <div>
+            <input type="email" name="username" id="id_username" required
+                   class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
+                   placeholder="you@example.com">
+          </div>
+          <!-- Password Field with Show Toggle -->
+          <div>
+            <div class="relative">
+              <input type="password" name="password" id="id_password" required
+                     class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
+                     placeholder="Pass********">
+            </div>
+          </div>
+          <!-- Forgot Password -->
+          <div class="flex justify-between items-center">
+              <button type="button" id="togglePassword"
+                      class="text-gray-300 flex items-center">
+                  <i class="fat fa-face-woozy text-gray-400 mr-2"></i>
+                  <span id="togglePasswordText" class="text-[10px] uppercase">show password</span>
+              </button>
+            <a href="{% url 'password_reset' %}" class="text-purple-700 hover:underline text-sm">Forgot Password?</a>
+          </div>
+          <!-- Submit Button -->
+          <button type="submit"
+                  class="w-full purple-bg text-white py-3 rounded-lg font-light hover:bg-purple-800 transition flex items-center justify-center">
+            <span class="material-symbols-outlined mr-12">login</span>
+            Login
+          </button>
+        </form>
+        <!-- Sign Up Link -->
+        <p class="mt-6 text-center text-gray-700">
+          Don't have an account?
+          <a href="{% url 'register' %}" class="text-purple-700 hover:underline font-medium">Sign Up</a>
+        </p>
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}
+
+{% block custom-js %}
+<script>
+  document.getElementById('togglePassword').addEventListener('click', function() {
+    const passwordField = document.getElementById('id_password');
+    const type = passwordField.type === 'password' ? 'text' : 'password';
+    passwordField.type = type;
+    document.getElementById('togglePasswordText').textContent = type === 'password' ? 'show password' : 'hide password';
+    const icon = this.querySelector('i');
+    icon.classList.toggle('fa-face-woozy', type === 'password');
+    icon.classList.toggle('fa-face-weary', type !== 'password');
+  });
+</script>
+{% endblock %}

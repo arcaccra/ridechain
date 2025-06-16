@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    Sign Up
+{% endblock %}
+
+{% block custom-css %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block content %}
+<main>
+  <section class="w-screen h-screen flex flex-col md:flex-row">
+    <!-- Left: Image -->
+    <div class="hidden w-full h-full md:block md:w-1/2 relative flex items-center justify-center">
+      <div class="reg-wavy-circle relative">
+        <img src="https://www.shutterstock.com/image-photo/portrait-cheerful-positive-young-black-600nw-2149540015.jpg"
+             alt="Register Background"
+             class="w-full h-full object-cover object-center rounded-full">
+      </div>
+      <!-- Decorative icons (reuse from login) -->
+      <div class="absolute top-[25%] left-[20%] w-20 h-20 bg-purple-600 rounded-full flex items-center justify-center shadow-lg">
+        <span class="material-symbols-outlined text-white text-xl">lock</span>
+      </div>
+      <div class="absolute bottom-[20%] right-[30%] w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
+        <span class="material-symbols-outlined text-white text-xl">person</span>
+      </div>
+      <div class="absolute top-[50%] right-[7%] transform -translate-y-1/2 w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center">
+        <span class="material-symbols-outlined text-white text-lg">email</span>
+      </div>
+    </div>
+    <!-- Right: Form -->
+    <div class="w-full md:w-1/2 flex items-center justify-center bg-white/20">
+      <div class="max-w-md w-full p-8 rounded-2xl bg-white/80 backdrop-blur-sm">
+        <h2 class="text-4xl header-font font-semibold purple-text mb-8">Sign Up</h2>
+        <form method="post" action="{% url 'register' %}" class="space-y-6">
+          {% csrf_token %}
+          <!-- Email Field -->
+          <div>
+            <input type="email" name="email" id="id_email" required
+                   class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
+                   placeholder="you@example.com">
+          </div>
+          <!-- Username Field -->
+          <div>
+            <input type="text" name="username" id="id_username" required
+                   class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
+                   placeholder="Username">
+          </div>
+          <!-- Password Field -->
+          <div>
+            <div class="relative">
+              <input type="password" name="password1" id="id_password1" required
+                     class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
+                     placeholder="Password">
+            </div>
+          </div>
+          <!-- Confirm Password Field -->
+          <div>
+            <div class="relative">
+              <input type="password" name="password2" id="id_password2" required
+                     class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-400 transition"
+                     placeholder="Confirm Password">
+            </div>
+          </div>
+          <!-- Show Password Toggle -->
+          <div class="flex justify-between items-center">
+            <button type="button" id="togglePassword"
+                    class="text-gray-300 flex items-center">
+                <i class="fat fa-face-woozy text-gray-400 mr-2"></i>
+                <span id="togglePasswordText" class="text-[10px] uppercase">show password</span>
+            </button>
+            <a href="{% url 'login' %}" class="text-purple-700 hover:underline text-sm">Already have an account?</a>
+          </div>
+          <!-- Submit Button -->
+          <button type="submit"
+                  class="w-full purple-bg text-white py-3 rounded-lg font-light hover:bg-purple-800 transition flex items-center justify-center">
+            <span class="material-symbols-outlined mr-12">person_add</span>
+            Sign Up
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}
+
+{% block custom-js %}
+<script>
+  document.getElementById('togglePassword').addEventListener('click', function() {
+    const pw1 = document.getElementById('id_password1');
+    const pw2 = document.getElementById('id_password2');
+    const type = pw1.type === 'password' ? 'text' : 'password';
+    pw1.type = type;
+    pw2.type = type;
+    document.getElementById('togglePasswordText').textContent = type === 'password' ? 'show password' : 'hide password';
+    const icon = this.querySelector('i');
+    icon.classList.toggle('fa-face-woozy', type === 'password');
+    icon.classList.toggle('fa-face-weary', type !== 'password');
+  });
+</script>
+{% endblock %}

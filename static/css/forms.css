@@ -1,0 +1,25 @@
+.wavy-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+  --s: 750px; /* adjust to control the size */
+  width: var(--s);
+    overflow: hidden;
+  aspect-ratio: 1;
+  --g:/calc(var(--s)*0.241) calc(var(--s)*0.241) radial-gradient(50% 50%,#000 99%,#0000 101%) no-repeat;
+  mask: calc(50% + var(--s)*0.352) calc(50% + var(--s)*0) var(--g),calc(50% + var(--s)*0.27) calc(50% + var(--s)*0.226) var(--g),calc(50% + var(--s)*0.061) calc(50% + var(--s)*0.347) var(--g),calc(50% + var(--s)*-0.176) calc(50% + var(--s)*0.305) var(--g),calc(50% + var(--s)*-0.331) calc(50% + var(--s)*0.12) var(--g),calc(50% + var(--s)*-0.331) calc(50% + var(--s)*-0.12) var(--g),calc(50% + var(--s)*-0.176) calc(50% + var(--s)*-0.305) var(--g),calc(50% + var(--s)*0.061) calc(50% + var(--s)*-0.347) var(--g),calc(50% + var(--s)*0.27) calc(50% + var(--s)*-0.226) var(--g),radial-gradient(calc(var(--s)*0.439),#000 99%,#0000 101%) subtract,calc(50% + var(--s)*0.507) calc(50% + var(--s)*0.184) var(--g),calc(50% + var(--s)*0.27) calc(50% + var(--s)*0.467) var(--g),calc(50% + var(--s)*-0.094) calc(50% + var(--s)*0.531) var(--g),calc(50% + var(--s)*-0.413) calc(50% + var(--s)*0.347) var(--g),calc(50% + var(--s)*-0.539) calc(50% + var(--s)*0) var(--g),calc(50% + var(--s)*-0.413) calc(50% + var(--s)*-0.347) var(--g),calc(50% + var(--s)*-0.094) calc(50% + var(--s)*-0.531) var(--g),calc(50% + var(--s)*0.27) calc(50% + var(--s)*-0.467) var(--g),calc(50% + var(--s)*0.507) calc(50% + var(--s)*-0.184) var(--g);
+}
+
+.reg-wavy-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+  --s: 750px; /* adjust to control the size */
+  width: var(--s);
+    overflow: hidden;
+  aspect-ratio: 1;
+   --g:/calc(var(--s)*0.388) calc(var(--s)*0.388) radial-gradient(50% 50%,#000 99%,#0000 101%) no-repeat;
+  mask: calc(50% + var(--s)*0.234) calc(50% + var(--s)*0.143) var(--g),calc(50% + var(--s)*-0.143) calc(50% + var(--s)*0.234) var(--g),calc(50% + var(--s)*-0.234) calc(50% + var(--s)*-0.143) var(--g),calc(50% + var(--s)*0.143) calc(50% + var(--s)*-0.234) var(--g),radial-gradient(calc(var(--s)*0.375),#000 99%,#0000 101%) subtract,calc(50% + var(--s)*0.124) calc(50% + var(--s)*0.515) var(--g),calc(50% + var(--s)*-0.515) calc(50% + var(--s)*0.124) var(--g),calc(50% + var(--s)*-0.124) calc(50% + var(--s)*-0.515) var(--g),calc(50% + var(--s)*0.515) calc(50% + var(--s)*-0.124) var(--g);
+}

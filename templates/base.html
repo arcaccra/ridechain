@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="description" content="A simple template using Tailwind CSS and AOS for animations.">
+    <meta name="keywords" content="HTML, CSS, Tailwind CSS, AOS, Animation">
+    <meta name="author" content="Your Name">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- fontawesome CSS -->
+    <link rel="stylesheet" href="{% static 'fontawesome/css/all.css' %}">
+
+    <!-- Google Fonts: Muli, poppins and Sora all weights -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap"
+          rel="stylesheet">
+    <!-- Google Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <!-- AOS CSS -->
+    <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+
+    <!-- Base CSS -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <title>{% block title %}RideChain{% endblock %}</title>
+
+    {% block custom-css %}
+    {% endblock %}
+</head>
+<body class="bg-slate-50">
+{% block nav %}
+    {% include 'nav.html' %}
+{% endblock %}
+
+{% block content %}
+    <main>
+        <section class="w-screen h-screen flex items-center justify-center bg-gray-100">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold mb-4">Welcome to My Website</h1>
+                <p class="text-lg text-gray-700">This is a simple template using Tailwind CSS and AOS for
+                    animations.</p>
+            </div>
+        </section>
+    </main>
+{% endblock %}
+
+{% block footer %}
+    {% include 'footer.html' %}
+{% endblock %}
+
+
+<script src="{% static 'fontawesome/js/all.js' %}"></script>
+
+{% block custom-js %}
+{% endblock %}
+
+</body>
+</html>

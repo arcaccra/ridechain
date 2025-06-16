@@ -11,26 +11,50 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+import environ
+
+# Initialise environment variables
+env = environ.Env()
+env.escape_proxy = True
+environ.Env.read_env()
+
+APP_ENV = env('APP_ENV')
+IS_PRODUCTION = APP_ENV == 'production'
+
+if IS_PRODUCTION:
+    PAYSTACK_SECRET_KEY = env('PAYSTACK_LIVE_KEY')
+else:
+    PAYSTACK_SECRET_KEY = env('PAYSTACK_TEST_KEY')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-q)k9w4bhg5$*g2s&$*e$m0g^4%0kto*5on1h*+zzc*t)n6$_iv'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = APP_ENV != 'production'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
+templates = os.path.join(BASE_DIR, 'templates')
+static = os.path.join(BASE_DIR / 'static/')
+media = os.path.join(BASE_DIR / 'media/')
 
+AUTH_USER_MODEL = 'accounts.User'
 # Application definition
 
 INSTALLED_APPS = [
+    'accounts',
+    'homepage',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'drf_yasg',
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -47,6 +71,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'ridechain.urls'
@@ -54,7 +79,7 @@ ROOT_URLCONF = 'ridechain.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [templates],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -69,7 +94,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ridechain.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
@@ -79,7 +103,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -99,6 +122,24 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Django REST Framework configuration
+REST_FRAMEWORK = {
+    # List of authentication classes used for API requests
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.BasicAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
+    ],
+}
+
+# CORS (Cross-Origin Resource Sharing) configuration
+CORS_ORIGIN_ALLOW_ALL = True  # Allow all origins (not recommended for production)
+CORS_ORIGIN_WHITELIST = [
+    "http://127.0.0.1:8000",  # Local Django server
+    "https://yaw959.pythonahywhere.com",  # Deployed frontend/backend
+    "http://127.0.0.1:3000",  # Local frontend (e.g., React)
+    "https://api.paystack.co",  # Paystack API
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
@@ -111,11 +152,24 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = '/static/'
+STATICFILES_DIRS = (static,)
+
+# Media files (User-uploaded content)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = media
+
+# Email configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = env('EMAIL_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_PASS')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

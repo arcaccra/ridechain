@@ -15,8 +15,46 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+from django.urls import path, include
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
+from rest_framework import routers
 
-urlpatterns = [
+router = routers.DefaultRouter()
+# Register your API endpoints with the router
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Minglex APIS",
+        default_version="v1",
+        description="API documentation",
+        terms_of_service="https://www.example.com/terms/",
+        contact=openapi.Contact(email="contact@example.com"),
+        license=openapi.License(name="MIT License"),
+    ),
+    public=True,
+    permission_classes=[permissions.IsAuthenticated],
+)
+
+urlpatterns = ([
+    path('', include('homepage.urls')),
+    path('apis/', include('apis.urls')),
+   path(
+       "apis/docs/",
+       schema_view.with_ui("swagger", cache_timeout=0),
+       name="schema-swagger-ui",
+   ),
+   path(
+       "apis/redoc/",
+       schema_view.with_ui("redoc", cache_timeout=0),
+       name="schema-redoc",
+   ),
+    path('accounts/', include('accounts.urls')),
     path('admin/', admin.site.urls),
-]
+    path("api-auth/", include("rest_framework.urls")),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+               + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT))

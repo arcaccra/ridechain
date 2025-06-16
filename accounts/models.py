@@ -97,4 +97,4 @@ class Driver(models.Model):
         ordering = ['-date_created']
 
     def __str__(self):
-        return f'{self.user.full_name.split(' ')[0]} ({self.vehicle_plate_number})'
+        return f"{self.user.full_name.split(' ')[0]} ({self.vehicle_plate_number})"

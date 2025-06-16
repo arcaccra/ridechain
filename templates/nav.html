@@ -22,7 +22,7 @@
       </li>
         {% if user.is_authenticated and user.is_staff %}
         	<li class="mr-6">
-        <a href="{% url 'schema-redoc' %}" class="text-[13px] text-purple-200 font-light hover:text-white">
+        <a href="{% url 'schema-redoc' %}" target="_blank" class="text-[13px] text-purple-200 font-light hover:text-white">
             API Docs
         </a>
       </li>

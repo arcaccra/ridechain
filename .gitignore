@@ -1,2 +1,15 @@
 db.sqlite3
 ridechain/.env
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+
+# Media Files
+media/

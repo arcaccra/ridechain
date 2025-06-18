@@ -1,6 +1,9 @@
 db.sqlite3
 ridechain/.env
 
+# All Migrations
+**/migrations/
+
 # macOS
 **/.DS_Store
 

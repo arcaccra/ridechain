@@ -99,7 +99,7 @@ WSGI_APPLICATION = 'ridechain.wsgi.application'
 
 if IS_PRODUCTION:
     DATABASES = {
-        'mysql': {
+        'default': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': env('DB_NAME'),
             'USER': env('DB_USER'),

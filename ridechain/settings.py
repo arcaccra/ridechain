@@ -103,7 +103,7 @@ if IS_PRODUCTION:
             'ENGINE': 'django.db.backends.mysql',
             'NAME': env('DB_NAME'),
             'USER': env('DB_USER'),
-            'PASSWORD': env('DB_PASSWORD'),
+            'PASSWORD': env('DB_PASS'),
             'HOST': env('DB_HOST'),
             'PORT': env('DB_PORT'),
         }
@@ -149,6 +149,7 @@ CORS_ORIGIN_ALLOW_ALL = True  # Allow all origins (not recommended for productio
 CORS_ORIGIN_WHITELIST = [
     "http://127.0.0.1:8000",  # Local Django server
     "https://yaw959.pythonahywhere.com",  # Deployed frontend/backend
+    "https://app.arcaccra.com",  # Production frontend
     "http://127.0.0.1:3000",  # Local frontend (e.g., React)
     "https://api.paystack.co",  # Paystack API
 ]

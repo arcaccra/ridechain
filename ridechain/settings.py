@@ -101,14 +101,16 @@ if IS_PRODUCTION:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
+            'HOST': env('DB_HOST'),
             'NAME': env('DB_NAME'),
             'USER': env('DB_USER'),
             'PASSWORD': env('DB_PASS'),
-            'HOST': env('DB_HOST'),
             'PORT': env('DB_PORT'),
             'OPTIONS': {
+                'charset': 'utf8mb4',
+                'use_unicode': True,
                 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-            },
+            }
         }
     }
 else:

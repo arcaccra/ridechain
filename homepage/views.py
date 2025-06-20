@@ -5,6 +5,9 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from accounts.forms import SubscriberForm
 from accounts.models import Subscriber
+import os
+import random
+from django.conf import settings
 
 # Create your views here.
 
@@ -18,7 +21,20 @@ class HomePageView(View):
         """Handles GET requests to display the subscriber form and list of subscribers."""
         form = self.form_class()
         subscribers = Subscriber.objects.all()  # Retrieve all subscribers
-        return render(request, self.template_name, {'form': form, 'subscribers': subscribers})
+
+        image_path = os.path.join(settings.STATICFILES_DIRS[0], 'images', 'profiles')
+        images = [image for image in os.listdir(image_path) if image.endswith('.jpeg')]
+        subscriber_data = []
+
+        for subscriber in subscribers:
+            random_image = random.choice(images) if images else ''
+            subscriber_data.append((subscriber, f'images/profiles/{random_image}'))
+
+        return render(request, self.template_name, {
+            'form': form,
+            'subscriber_data': subscriber_data,
+            'subscribers': subscribers
+        })
 
     def post(self, request, *args, **kwargs):
         """Handles POST requests to process the subscriber form."""

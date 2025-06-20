@@ -40,21 +40,18 @@
                         </button>
                     </div>
                     <div class="p-6 flex items-center mt-16">
-                        <div class="flex items-center -space-x-2">
-                            <img class="w-12 h-12 rounded-full border-2 border-yellow-400"
-                                 src="https://randomuser.me/api/portraits/men/32.jpg" alt="User 1">
-                            <img class="w-12 h-12 rounded-full border-2 border-yellow-400"
-                                 src="https://randomuser.me/api/portraits/women/44.jpg" alt="User 2">
-                            <img class="w-12 h-12 rounded-full border-2 border-yellow-400"
-                                 src="https://randomuser.me/api/portraits/men/54.jpg" alt="User 3">
-                            <img class="w-12 h-12 rounded-full border-2 border-yellow-400"
-                                 src="https://randomuser.me/api/portraits/men/34.jpg" alt="User 4">
-                            <img class="w-12 h-12 rounded-full border-2 border-yellow-400"
-                                 src="https://images.squarespace-cdn.com/content/v1/6361900771d4854cd2791d54/03c3aa9d-ec68-4348-bc54-a61d31039e3a/Vivian+Okonkwo+square+crop+copy.jpg"
-                                 alt="User 4">
+                        <div class="flex items-center -space-x-4">
+                            {% for subscriber, image in subscriber_data|slice:5 %}
+    <img src="{% static image %}" alt="{{ subscriber.name }}"
+                                     class="w-16 h-16 rounded-full border-4 purple-border shadow-md profile-image">
 
+                            {% endfor %}
+                        <div class="w-auto h-16 px-6 rounded-full border-4 purple-border bg-yellow-400 flex items-center justify-center">
+                            <p class="purple header-font font-bold">
+                                +{{ subscribers.count|add:"-5" }} <span class="ml-2.5">Waiting</span>
+                            </p>
                         </div>
-                        <span class="text-yellow-400 text-2xl font-light ml-16"><span class="font-bold header-font">+200</span> Waiting</span>
+                        </div>
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

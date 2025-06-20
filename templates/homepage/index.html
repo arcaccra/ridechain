@@ -41,20 +41,12 @@
                     </div>
                     <div class="p-6 flex items-center mt-16">
                         <div class="flex items-center -space-x-2">
-                            <img class="w-12 h-12 rounded-full border-2 border-yellow-400"
-                                 src="https://randomuser.me/api/portraits/men/32.jpg" alt="User 1">
-                            <img class="w-12 h-12 rounded-full border-2 border-yellow-400"
-                                 src="https://randomuser.me/api/portraits/women/44.jpg" alt="User 2">
-                            <img class="w-12 h-12 rounded-full border-2 border-yellow-400"
-                                 src="https://randomuser.me/api/portraits/men/54.jpg" alt="User 3">
-                            <img class="w-12 h-12 rounded-full border-2 border-yellow-400"
-                                 src="https://randomuser.me/api/portraits/men/34.jpg" alt="User 4">
-                            <img class="w-12 h-12 rounded-full border-2 border-yellow-400"
-                                 src="https://images.squarespace-cdn.com/content/v1/6361900771d4854cd2791d54/03c3aa9d-ec68-4348-bc54-a61d31039e3a/Vivian+Okonkwo+square+crop+copy.jpg"
-                                 alt="User 4">
-
+                            {% for subscriber in subscribers|slice:":7" %}
+                            <img class="subscriber-avatar bg-yellow-400 p-0.5 w-12 h-12 rounded-full border-4 purple-border"
+                                 src="" alt="{{ subscriber.name|default:'User' }}">
+                            {% endfor %}
                         </div>
-                        <span class="text-yellow-400 text-2xl font-light ml-16"><span class="font-bold header-font">+1.2K</span> Waiting</span>
+                        <span class="text-yellow-400 text-2xl font-light ml-16"><span class="font-bold header-font">+{{ subscribers.count }}</span> Waiting</span>
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -426,15 +418,85 @@
 
 
     </main>
+{{ profile_images|json_script:"profile-images-data" }}
 {% endblock %}
 
 {% block custom-js %}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.faq-question').forEach(function (btn) {
-                btn.addEventListener('click', function () {
-                    const item = btn.closest('.faq-item');
-                    item.classList.toggle('open');
+            // Modal functionality
+            const openBtn = document.getElementById('openWaitlistModal');
+            const closeBtn = document.getElementById('closeWaitlistModal');
+            const modal = document.getElementById('waitlistModal');
+            const formHasErrors = {{ form.errors|yesno:"true,false" }};
+
+            const openModal = () => {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modal.classList.add('opacity-100');
+                modal.firstElementChild.classList.remove('scale-95');
+                modal.firstElementChild.classList.add('scale-100');
+            };
+
+            const closeModal = () => {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                modal.classList.remove('opacity-100');
+                modal.firstElementChild.classList.add('scale-95');
+                modal.firstElementChild.classList.remove('scale-100');
+            };
+
+            if (openBtn) {
+                openBtn.addEventListener('click', openModal);
+            }
+
+            if (closeBtn) {
+                closeBtn.addEventListener('click', closeModal);
+            }
+
+            if (modal) {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        closeModal();
+                    }
+                });
+            }
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeModal();
+                }
+            });
+
+            if (formHasErrors) {
+                openModal();
+            }
+
+            // Random avatars for subscribers
+            const imagesData = JSON.parse(document.getElementById('profile-images-data').textContent);
+            const avatars = document.querySelectorAll('.subscriber-avatar');
+            const staticPrefix = "{% get_static_prefix %}";
+
+            if (imagesData && imagesData.length > 0) {
+                avatars.forEach(avatar => {
+                    const randomImage = imagesData[Math.floor(Math.random() * imagesData.length)];
+                    avatar.src = `${staticPrefix}${randomImage}`;
+                });
+            }
+
+            // FAQ accordion
+            document.querySelectorAll('.faq-question').forEach(button => {
+                button.addEventListener('click', () => {
+                    const answer = button.nextElementSibling;
+                    const icon = button.querySelector('i');
+
+                    if (answer.style.display === 'block') {
+                        answer.style.display = 'none';
+                        icon.classList.remove('fa-chevron-up');
+                        icon.classList.add('fa-chevron-down');
+                    } else {
+                        answer.style.display = 'block';
+                        icon.classList.remove('fa-chevron-down');
+                        icon.classList.add('fa-chevron-up');
+                    }
                 });
             });
         });

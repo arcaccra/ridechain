@@ -234,64 +234,85 @@
                     Learn how RideChain creates value for both passengers and drivers in a transparent, fair ecosystem.
                 </p>
             </div>
-            <div class="relative max-w-[80%] mx-auto px-6 md:px-16 py-8">
+            <div class="relative md:max-w-[80%] mx-auto px-2.5 md:px-16 py-8">
                 <div class="flex flex-col md:flex-row gap-12">
                     <!-- Riders Benefits Card (no shadow, with right dotted border on md+) -->
-                    <div class="bg-white p-8 rounded-lg">
-                        <h3 class="text-2xl font-bold mb-4 purple-text">For Riders</h3>
-                        <ul class="divide-y divide-gray-200">
-                            <li class="flex items-start space-x-4 py-4">
-                                <span class="material-symbols-outlined text-purple-600 mt-1">attach_money</span>
-                                <span><strong>Fair, Transparent Pricing:</strong> No surge fees or hidden costs; smart contracts lock in your fare.</span>
-                            </li>
-                            <li class="flex items-start space-x-4 py-4">
-                                <span class="material-symbols-outlined text-purple-600 mt-1">people_outline</span>
-                                <span><strong>Direct Connections:</strong> Book directly with drivers for faster pick-ups and fewer intermediaries.</span>
-                            </li>
-                            <li class="flex items-start space-x-4 py-4">
-                                <span class="material-symbols-outlined text-purple-600 mt-1">security</span>
-                                <span><strong>Enhanced Safety:</strong> Verified driver identities and real-time ride tracking give you peace of mind.</span>
-                            </li>
-                            <li class="flex items-start space-x-4 py-4">
-                                <span class="material-symbols-outlined text-purple-600 mt-1">payment</span>
-                                <span><strong>Easy Payments:</strong> Digital transactions using blockchain are fast, secure, and fully recorded.</span>
-                            </li>
-                        </ul>
-                    </div>
-                    <!-- Vertical dotted line with evenly spaced circles (only on md+) -->
-                    <div class="flex flex-col justify-evenly items-center relative">
-                        <div class="absolute inset-0 flex flex-col justify-evenly items-center">
-                            <span class="material-symbols-outlined purple-text">circle</span>
-                            <div class="border-r border-dotted border-gray-300 h-16 w-0.5"></div>
-                            <span class="material-symbols-outlined purple-text">circle</span>
-                            <div class="border-r border-dotted border-gray-300 h-16 w-0.5"></div>
-                            <span class="material-symbols-outlined purple-text">circle</span>
-                            <div class="border-r border-dotted border-gray-300 h-16 w-0.5"></div>
-                            <span class="material-symbols-outlined purple-text">circle</span>
-                        </div>
-                    </div>
-                    <!-- Drivers Benefits Card (no shadow) -->
-                    <div class="bg-white p-8 rounded-lg">
-                        <h3 class="text-2xl font-bold mb-4 purple-text">For Drivers</h3>
-                        <ul class="divide-y divide-gray-200">
-                            <li class="flex items-start space-x-4 py-4">
-                                <span class="material-symbols-outlined text-purple-600 mt-1">monetization_on</span>
-                                <span><strong>Higher Earnings:</strong> Keep more of each fare thanks to minimal platform fees.</span>
-                            </li>
-                            <li class="flex items-start space-x-4 py-4">
-                                <span class="material-symbols-outlined text-purple-600 mt-1">schedule</span>
-                                <span><strong>Flexible Schedule:</strong> Choose your own hours and routes without restrictions.</span>
-                            </li>
-                            <li class="flex items-start space-x-4 py-4">
-                                <span class="material-symbols-outlined text-purple-600 mt-1">verified</span>
-                                <span><strong>Blockchain-Backed Trust:</strong> Instant, guaranteed payments via smart contracts after every trip.</span>
-                            </li>
-                            <li class="flex items-start space-x-4 py-4">
-                                <span class="material-symbols-outlined text-purple-600 mt-1">emoji_events</span>
-                                <span><strong>Reputation & Growth:</strong> Reliable ratings help you build credibility and attract more rides.</span>
-                            </li>
-                        </ul>
-                    </div>
+                    <div class="flex flex-col md:flex-row gap-12">
+  <!-- Riders Benefits Card -->
+  <div class="md:p-8 rounded-lg">
+    <h3 class="text-3xl header-font font-semibold mb-4 text-purple-600">For Riders</h3>
+    <ul class="divide-y divide-gray-200">
+      <li class="flex items-start space-x-4 py-8">
+        <div class="w-12 h-12 shrink-0 bg-[#E8D8FF] text-purple-600 rounded-[12px] flex items-center justify-center">
+          <span class="material-symbols-outlined">attach_money</span>
+        </div>
+        <span><strong>Fair, Transparent Pricing:</strong> No surge fees or hidden costs; smart contracts lock in your fare.</span>
+      </li>
+      <li class="flex items-start space-x-4 py-8">
+        <div class="w-12 h-12 shrink-0 bg-[#D8EBFF] text-blue-600 rounded-[12px] flex items-center justify-center">
+          <span class="material-symbols-outlined">people_outline</span>
+        </div>
+        <span><strong>Direct Connections:</strong> Book directly with drivers for faster pick-ups and fewer intermediaries.</span>
+      </li>
+      <li class="flex items-start space-x-4 py-8">
+        <div class="w-12 h-12 shrink-0 bg-[#D8FFE8] text-green-600 rounded-[12px] flex items-center justify-center">
+          <span class="material-symbols-outlined">security</span>
+        </div>
+        <span><strong>Enhanced Safety:</strong> Verified driver identities and real-time ride tracking give you peace of mind.</span>
+      </li>
+      <li class="flex items-start space-x-4 py-8">
+        <div class="w-12 h-12 shrink-0 bg-[#FFF9D8] text-yellow-600 rounded-[12px] flex items-center justify-center">
+          <span class="material-symbols-outlined">payment</span>
+        </div>
+        <span><strong>Easy Payments:</strong> Digital transactions via blockchain are fast, secure, and fully recorded.</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Central line with lighter style -->
+  <div class="hidden md:flex flex-col justify-evenly items-center relative">
+    <div class="absolute inset-0 flex flex-col justify-evenly items-center">
+      <span class="material-symbols-outlined text-gray-300">circle</span>
+      <div class="border-r border-dotted border-gray-200 h-8 w-0.5"></div>
+      <span class="material-symbols-outlined text-gray-300">circle</span>
+      <div class="border-r border-dotted border-gray-200 h-8 w-0.5"></div>
+      <span class="material-symbols-outlined text-gray-300">circle</span>
+      <div class="border-r border-dotted border-gray-200 h-8 w-0.5"></div>
+      <span class="material-symbols-outlined text-gray-300">circle</span>
+    </div>
+  </div>
+
+  <!-- Drivers Benefits Card -->
+  <div class="p-4 md:p-8 rounded-lg">
+    <h3 class="text-3xl header-font font-semibold mb-4 text-orange-500">For Drivers</h3>
+    <ul class="divide-y divide-gray-200">
+      <li class="flex items-start space-x-4 py-8">
+        <div class="w-12 h-12 shrink-0 bg-[#FFE8D8] text-orange-500 rounded-[12px] flex items-center justify-center">
+          <span class="material-symbols-outlined">monetization_on</span>
+        </div>
+        <span><strong>Higher Earnings:</strong> Keep more of each fare thanks to minimal platform fees.</span>
+      </li>
+      <li class="flex items-start space-x-4 py-8">
+        <div class="w-12 h-12 shrink-0 bg-[#E8F7FF] text-teal-500 rounded-[12px] flex items-center justify-center">
+          <span class="material-symbols-outlined">schedule</span>
+        </div>
+        <span><strong>Flexible Schedule:</strong> Choose your own hours and routes without restrictions.</span>
+      </li>
+      <li class="flex items-start space-x-4 py-8">
+        <div class="w-12 h-12 shrink-0 bg-[#E8FFE8] text-green-500 rounded-[12px] flex items-center justify-center">
+          <span class="material-symbols-outlined">verified</span>
+        </div>
+        <span><strong>Blockchain-Backed Trust:</strong> Instant, guaranteed payouts via smart contracts after each trip.</span>
+      </li>
+      <li class="flex items-start space-x-4 py-8">
+        <div class="w-12 h-12 shrink-0 bg-[#FFE8F0] text-pink-500 rounded-[12px] flex items-center justify-center">
+          <span class="material-symbols-outlined">emoji_events</span>
+        </div>
+        <span><strong>Reputation & Growth:</strong> Reliable ratings help you build credibility and attract more rides.</span>
+      </li>
+    </ul>
+  </div>
+</div>
                 </div>
 
                 <!-- Vertical dotted line with evenly spaced circles (only on md+) -->
@@ -305,7 +326,7 @@
         </section>
 
         <!-- Support Section -->
-        <section class="purple-bg w-full py-32 overflow-x-hidden">
+        <section class="purple-bg w-full h-screen py-32 overflow-x-hidden">
             <div class="max-w-[80%] mx-auto px-6 md:px-16 flex flex-col md:flex-row items-center gap-12">
                 <!-- Left: Image -->
                 <div class="md:w-1/2 p-12">
@@ -335,7 +356,7 @@
                         <div class="flex flex-col items-center md:flex-row gap-4">
 
                             <button type="submit"
-                                    class="bg-purple-700 text-white flex-1 py-4 rounded-lg font-semibold hover:bg-purple-800 transition flex items-center justify-center">
+                                    class="bg-yellow-400 purple-text flex-1 py-4 rounded-lg font-light hover:scale-[1.05] transition flex items-center justify-center">
                                 <span class="material-symbols-outlined mr-2">send</span>
                                 Send Message
                             </button>

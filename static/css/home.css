@@ -19,7 +19,7 @@
   width: 500px;
   height: 500px;
   background: linear-gradient(45deg, #ff00cc, #333399);
-  border: white 10px solid;
+  border: #ffdd00 10px solid;
 
   /* Define a wavy circular shape */
   border-radius: 45% 55% 45% 55% / 55% 45% 55% 45%;

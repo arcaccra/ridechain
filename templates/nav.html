@@ -26,6 +26,11 @@
             API Docs
         </a>
       </li>
+            <li class="mr-6">
+        <a href="{% url 'apis_root' %}" target="_blank" class="text-[13px] text-purple-200 font-light hover:text-white">
+            Test APIs
+        </a>
+      </li>
         {% endif %}
         <li class="mr-6">
             <a href="#" class="text-[13px] text-purple-200 font-light hover:text-white">
@@ -40,7 +45,7 @@
             <span class="inline-flex items-center justify-center border-2 border-yellow-400 h-12 w-12 rounded-[16px] overflow-hidden mr-2"
                   style="background-color: #{{ user.full_name|first|lower }}1a;">
               {% if user.avatar %}
-                <img src="{{ user.avatar.url }}" class="h-full w-full object-center object-center" alt="{{ user.username }}"/>
+                <img src="{{ user.avatar.url }}" class="h-full w-full object-cover object-center" alt="{{ user.username }}"/>
               {% else %}
                 <span class="text-white text-2xl">{{ user.full_name|first|upper }}</span>
               {% endif %}

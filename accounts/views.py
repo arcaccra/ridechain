@@ -1,3 +1,4 @@
+from cffi.cffi_opcode import CLASS_NAME
 from django.contrib.auth import views as auth_views
 from django.views import View
 from django.shortcuts import redirect
@@ -31,12 +32,16 @@ class UserRegisterView(CreateView):
     success_url = reverse_lazy('home')
 
     def form_valid(self, form):
-        # Save the new user
-        user = form.save()
-        # Log them in
-        login(self.request, user)
-        # Redirect to success URL
-        return redirect(self.get_success_url())
+        response = super().form_valid(form)
+
+        # Save the avatar file, if present
+        avatar = self.request.FILES.get('avatar')
+        if avatar:
+            self.object.avatar = avatar
+            self.object.save()
+
+        login(self.request, self.object)
+        return response
 
 # Profile update view
 class UserProfileUpdateView(UpdateView):
@@ -70,4 +75,3 @@ class CustomLogoutView(View):
     def get(request):
         logout(request)
         return redirect('home')
-

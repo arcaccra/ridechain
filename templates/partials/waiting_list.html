@@ -1,0 +1,93 @@
+{% load static %}
+<!-- Modal Overlay -->
+<div id="waitlistModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 opacity-0 pointer-events-none transition-opacity duration-300">
+  <div class="bg-white rounded-[32px] w-full max-w-[75%] h-[75%] p-0 transform scale-95 transition-transform duration-300 grid grid-cols-2 overflow-hidden">
+    <div class="h-full">
+      <img src="{% static 'images/waitlist-image.jpeg' %}" alt="Waitlist Visual" class="w-full h-full object-cover">
+    </div>
+    <div class="p-6 h-full overflow-auto">
+      <div class="flex justify-between items-center mb-4">
+        <span></span>
+        <button id="closeWaitlistModal" class="text-gray-400 w-12 h-12 rounded-full flex justify-center items-center purple-border hover:border-[orangered] text-2xl font-light">&times;</button>
+      </div>
+      <div class="px-24 my-auto">
+        <h2 class="text-4xl purple-text header-font font-bold mb-4">Welcome to RideChain!</h2>
+        <p class="font-light text-slate-500 mb-12">Join our waitlist to be the first to know when we launch. We are building a platform that will revolutionize the way you experience rides.</p>
+          <form method="post" action="">
+        {% csrf_token %}
+        <div class="mb-4">
+          <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium mb-1">{{ form.name.label }}</label>
+          {{ form.name }}
+          {% if form.name.errors %}
+            <div class="text-red-500 text-xs mt-1">{{ form.name.errors|striptags }}</div>
+          {% endif %}
+        </div>
+        <div class="mb-4">
+          <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium mb-1">{{ form.email.label }}</label>
+          {{ form.email }}
+          {% if form.email.errors %}
+            <div class="text-red-500 text-xs mt-1">{{ form.email.errors|striptags }}</div>
+          {% endif %}
+        </div>
+        <div class="mt-6 flex items-center">
+          {{ form.accepted_mailing }}
+          <label for="{{ form.accepted_mailing.id_for_label }}" class="ml-2 block font-light text-gray-900">{{ form.accepted_mailing.label }}</label>
+        </div>
+        {% if form.accepted_mailing.errors %}
+          <div class="text-red-500 text-xs mb-4">{{ form.accepted_mailing.errors|striptags }}</div>
+        {% endif %}
+        <button type="submit" class="w-full py-4 purple-bg text-white rounded-lg hover:bg-[#5100ff] transition mt-12">Join Waitlist</button>
+      </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const openBtn = document.getElementById('openWaitlistModal');
+    const closeBtn = document.getElementById('closeWaitlistModal');
+    const modal = document.getElementById('waitlistModal');
+    const formHasErrors = {{ form.errors|yesno:"true,false" }};
+
+    const openModal = () => {
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.classList.add('opacity-100');
+      modal.firstElementChild.classList.remove('scale-95');
+      modal.firstElementChild.classList.add('scale-100');
+    };
+
+    const closeModal = () => {
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.classList.remove('opacity-100');
+      modal.firstElementChild.classList.add('scale-95');
+      modal.firstElementChild.classList.remove('scale-100');
+    };
+
+    if (openBtn) {
+      openBtn.addEventListener('click', openModal);
+    }
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', closeModal);
+    }
+
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          closeModal();
+        }
+      });
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+
+    if (formHasErrors) {
+      openModal();
+    }
+  });
+</script>

@@ -98,3 +98,22 @@ class Driver(models.Model):
 
     def __str__(self):
         return f"{self.user.full_name.split(' ')[0]} ({self.vehicle_plate_number})"
+
+
+class Subscriber(models.Model):
+    email = models.EmailField(unique=True)
+    name = models.CharField(max_length=100, blank=True, null=True)
+    accepted_mailing = models.BooleanField(default=False)
+    create_date = models.DateTimeField(auto_now_add=True)
+    update_date = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Subscriber'
+        verbose_name_plural = 'Subscribers'
+        ordering = ['-create_date']
+
+    def __str__(self):
+        return self.email
+
+
+

@@ -11,6 +11,8 @@
 
 {% block content %}
     <main>
+    {% include 'partials/message.html' %}
+    {% include 'partials/waiting_list.html' %}
         <!-- Hero Section -->
         <section class="purple-bg w-full h-screen py-32 flex items-center">
             <div class="max-w-[80%] mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 px-6 md:px-16 items-center">
@@ -23,19 +25,19 @@
                     </p>
                     <div class="mt-10 flex items-center space-x-3.5">
                         <a href="{% url 'login' %}"
-                           class="bg-white text-violet-900 p-4 rounded-lg flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow duration-300">
+                           class="hidden bg-white text-violet-900 p-4 rounded-lg flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow duration-300">
                             <img src="{% static 'images/android-svgrepo-com.svg' %}" alt="Android Login"
                                  class="w-6 h-6">
                         </a>
                         <a href="{% url 'login' %}"
-                           class="bg-white text-violet-900 p-4 rounded-lg flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow duration-300">
+                           class="hidden bg-white text-violet-900 p-4 rounded-lg flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow duration-300">
                             <img src="{% static 'images/apple-173-svgrepo-com.svg' %}" alt="Apple Login"
                                  class="w-6 h-6">
                         </a>
-                        <a href="{% url 'register' %}"
+                        <button id="openWaitlistModal"
                            class="bg-transparent border border-white text-[12px] uppercase font-light tracking-wide text-white px-10 py-4 rounded-lg hover:bg-white hover:text-violet-900 transition duration-300">
                             Join Waitlist
-                        </a>
+                        </button>
                     </div>
                     <div class="p-6 flex items-center mt-16">
                         <div class="flex items-center -space-x-2">

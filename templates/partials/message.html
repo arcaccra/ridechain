@@ -1,0 +1,50 @@
+{% load static %}
+
+{% if messages %}
+<div id="toast-container" class="fixed bottom-5 right-5 z-[25] flex flex-col space-y-2">
+    {% for message in messages %}
+    <div class="bg-green-500 text-white rounded-md p-4 shadow-lg transition-all duration-300 transform translate-x-full opacity-0"
+         data-message-id="{{ forloop.counter }}">
+        <div class="flex items-center justify-between">
+            <div class="flex-1">
+                {{ message }}
+            </div>
+            <button class="ml-4 text-white hover:text-green-200 focus:outline-none"
+                    onclick="closeToast('{{ forloop.counter }}')">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toasts = document.querySelectorAll('#toast-container > div');
+
+        toasts.forEach((toast, index) => {
+            setTimeout(() => {
+                showToast(toast.dataset.message_id);
+            }, 100 * (index + 1)); // Stagger the toasts
+        });
+    });
+
+    function showToast(messageId) {
+        const toast = document.querySelector(`#toast-container > div[data-message-id="${messageId}"]`);
+        toast.classList.remove('translate-x-full', 'opacity-0');
+        toast.classList.add('translate-x-0', 'opacity-100');
+
+        setTimeout(() => {
+            closeToast(messageId);
+        }, 5000); // Close after 5 seconds
+    }
+
+    function closeToast(messageId) {
+        const toast = document.querySelector(`#toast-container > div[data-message-id="${messageId}"]`);
+        toast.classList.remove('translate-x-0', 'opacity-100');
+        toast.classList.add('translate-x-full', 'opacity-0');
+    }
+</script>
+{% endif %}

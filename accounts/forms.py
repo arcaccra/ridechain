@@ -9,14 +9,14 @@ from django.contrib.auth.forms import (
     SetPasswordForm
 )
 from django.utils.translation import gettext_lazy as _
-from .models import User, Driver
+from .models import User, Driver, Subscriber
 
 
 class CustomUserCreationForm(UserCreationForm):
     """Form for creating new users with custom user model."""
     class Meta:
         model = User
-        fields = ('email', 'full_name', 'phone_number', 'country', 'avatar', 'is_driver')
+        fields = ('email', 'full_name', 'phone_number', 'country', 'avatar', 'is_driver', 'password1', 'password2')
 
 
 class CustomUserChangeForm(UserChangeForm):
@@ -119,3 +119,27 @@ class DriverRegistrationForm(UserCreationForm):
                 approved=self.cleaned_data.get('approved', False)
             )
         return user
+
+
+class SubscriberForm(forms.ModelForm):
+    """Form for subscribing to the newsletter."""
+
+    class Meta:
+        model = Subscriber
+        fields = ['name', 'email', 'accepted_mailing']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'w-full py-4 px-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
+                'placeholder': 'Your Name'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'w-full py-4 px-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
+                'placeholder': 'your@email.com'
+            })
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['name'].label = ''
+        self.fields['email'].label = ''
+        self.fields['accepted_mailing'].label = "Send me updates on RideChain."

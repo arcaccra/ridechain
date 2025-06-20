@@ -55,7 +55,11 @@
                                 {% endfor %}
                                 <div class="w-auto h-16 px-6 rounded-full border-4 purple-border bg-yellow-400 flex items-center justify-center">
                                     <p class="purple header-font font-bold">
-                                        +{{ subscribers.count|add:"-5" }} <span class="ml-2.5">Waiting</span>
+                                        {% if subscribers.count > 5 %}
+                                            <span>+{{ subscribers.count|add:"-5" }} Waiting</span>
+                                        {% else %}
+                                            <span>{{ subscribers.count }} Waiting</span>
+                                        {% endif %}
                                     </p>
                                 </div>
                             {% endif %}

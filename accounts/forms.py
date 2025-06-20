@@ -129,11 +129,11 @@ class SubscriberForm(forms.ModelForm):
         fields = ['name', 'email', 'accepted_mailing']
         widgets = {
             'name': forms.TextInput(attrs={
-                'class': 'w-full py-4 px-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
+                'class': 'w-full py-4 px-4 border border-gray-300 font-light rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
                 'placeholder': 'Your Name'
             }),
             'email': forms.EmailInput(attrs={
-                'class': 'w-full py-4 px-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
+                'class': 'w-full py-4 px-4 border border-gray-300 font-light rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
                 'placeholder': 'your@email.com'
             })
         }

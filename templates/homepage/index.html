@@ -41,16 +41,24 @@
                     </div>
                     <div class="p-6 flex items-center mt-16">
                         <div class="flex items-center -space-x-4">
-                            {% for subscriber, image in subscriber_data|slice:5 %}
-    <img src="{% static image %}" alt="{{ subscriber.name }}"
-                                     class="w-16 h-16 rounded-full border-4 purple-border shadow-md profile-image">
+                            {% if subscribers.count == 0 %}
+                                <div class="w-auto h-16 px-6 rounded-full border-4 purple-border bg-yellow-400 flex items-center justify-center">
+                                    <p class="purple header-font font-bold">
+                                        Be the first! <i class="fas fa-smile-beam ml-2.5"></i>
+                                    </p>
+                                </div>
+                            {% else %}
+                                {% for subscriber, image in subscriber_data|slice:5 %}
+                                    <img src="{% static image %}" alt="{{ subscriber.name }}"
+                                         class="w-16 h-16 rounded-full border-4 purple-border shadow-md profile-image">
 
-                            {% endfor %}
-                        <div class="w-auto h-16 px-6 rounded-full border-4 purple-border bg-yellow-400 flex items-center justify-center">
-                            <p class="purple header-font font-bold">
-                                +{{ subscribers.count|add:"-5" }} <span class="ml-2.5">Waiting</span>
-                            </p>
-                        </div>
+                                {% endfor %}
+                                <div class="w-auto h-16 px-6 rounded-full border-4 purple-border bg-yellow-400 flex items-center justify-center">
+                                    <p class="purple header-font font-bold">
+                                        +{{ subscribers.count|add:"-5" }} <span class="ml-2.5">Waiting</span>
+                                    </p>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

@@ -1,50 +1,66 @@
 {% load static %}
-
 {% if messages %}
 <div id="toast-container" class="fixed bottom-5 right-5 z-[25] flex flex-col space-y-2">
-    {% for message in messages %}
-    <div class="bg-green-500 text-white rounded-md p-4 shadow-lg transition-all duration-300 transform translate-x-full opacity-0"
+  {% for message in messages %}
+    <div class="{% if message.tags == 'success' %}bg-green-500{% elif message.tags == 'error' %}bg-red-500{% elif message.tags == 'warning' %}bg-yellow-500{% else %}bg-blue-500{% endif %} w-80 texy-sm text-white rounded-md p-4 shadow-lg transition-all duration-300 transform translate-x-full opacity-0"
          data-message-id="{{ forloop.counter }}">
-        <div class="flex items-center justify-between">
-            <div class="flex-1">
-                {{ message }}
-            </div>
-            <button class="ml-4 text-white hover:text-green-200 focus:outline-none"
-                    onclick="closeToast('{{ forloop.counter }}')">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-            </button>
+      <div class="flex items-center justify-between border-b border-opacity-50 pb-2">
+        <div class="flex items-center">
+          {% if message.tags == 'success' %}
+            <i class="fas fa-check-circle mr-2"></i>
+          {% elif message.tags == 'error' %}
+            <i class="fas fa-times-circle mr-2"></i>
+          {% elif message.tags == 'warning' %}
+            <i class="fas fa-exclamation-triangle mr-2 text-yellow-200"></i>
+          {% else %}
+            <i class="fas fa-info-circle mr-2"></i>
+          {% endif %}
+          <h5 class="font-bold">{{ message.tags|title }}</h5>
         </div>
+        <button class="ml-4 text-white hover:text-green-200 focus:outline-none"
+                onclick="closeToast('{{ forloop.counter }}')">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+               xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="pt-2">
+        {{ message }}
+      </div>
     </div>
-    {% endfor %}
+  {% endfor %}
 </div>
-
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const toasts = document.querySelectorAll('#toast-container > div');
-
-        toasts.forEach((toast, index) => {
-            setTimeout(() => {
-                showToast(toast.dataset.message_id);
-            }, 100 * (index + 1)); // Stagger the toasts
-        });
+  function showToasts() {
+    const toasts = document.querySelectorAll('#toast-container > div');
+    toasts.forEach((toast, index) => {
+      setTimeout(() => {
+        showToast(toast.dataset.messageId || toast.dataset.message_id);
+      }, 100 * (index + 1));
     });
+  }
 
-    function showToast(messageId) {
-        const toast = document.querySelector(`#toast-container > div[data-message-id="${messageId}"]`);
-        toast.classList.remove('translate-x-full', 'opacity-0');
-        toast.classList.add('translate-x-0', 'opacity-100');
+  function showToast(messageId) {
+    const toast = document.querySelector(`#toast-container > div[data-message-id="${messageId}"]`);
+    toast.classList.remove('translate-x-full', 'opacity-0');
+    toast.classList.add('translate-x-0', 'opacity-100');
+    setTimeout(() => {
+      closeToast(messageId);
+    }, 5000);
+  }
 
-        setTimeout(() => {
-            closeToast(messageId);
-        }, 5000); // Close after 5 seconds
+  function closeToast(messageId) {
+    const toast = document.querySelector(`#toast-container > div[data-message-id="${messageId}"]`);
+    toast.classList.remove('translate-x-0', 'opacity-100');
+    toast.classList.add('translate-x-full', 'opacity-0');
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    if (document.querySelectorAll('#toast-container > div').length > 0) {
+      showToasts();
     }
-
-    function closeToast(messageId) {
-        const toast = document.querySelector(`#toast-container > div[data-message-id="${messageId}"]`);
-        toast.classList.remove('translate-x-0', 'opacity-100');
-        toast.classList.add('translate-x-full', 'opacity-0');
-    }
+  });
 </script>
 {% endif %}

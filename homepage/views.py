@@ -8,8 +8,8 @@ from accounts.models import Subscriber
 import os
 import random
 from django.conf import settings
+from utilities.mailing_and_messaging import send_welcome_email  # Import the send_welcome_email function
 
-# Create your views here.
 
 class HomePageView(View):
     """View for the homepage that handles subscriber form."""
@@ -40,9 +40,14 @@ class HomePageView(View):
         """Handles POST requests to process the subscriber form."""
         form = self.form_class(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Subscription successful!')
+            subscriber = form.save()  # Save the form and get the subscriber instance
+            messages.success(request, f'Welcome to RideChain, {subscriber.name}! We are excited to have you join our community. We will keep you updated. Thank you for subscribing!')
+
+            # Send welcome email
+            send_welcome_email([subscriber.email],
+                               subscriber.name)  # Assuming your Subscriber model has 'email' and 'name' fields
             return HttpResponseRedirect(self.success_url)
         else:
+            messages.error(request, 'There was an error with your subscription. Please try again.')
             subscribers = Subscriber.objects.all()
             return render(request, self.template_name, {'form': form, 'subscribers': subscribers})

@@ -42,8 +42,8 @@ DEBUG = APP_ENV != 'production'
 ALLOWED_HOSTS = ['*']
 
 templates = os.path.join(BASE_DIR, 'templates')
-static = os.path.join(BASE_DIR / 'static/')
-media = os.path.join(BASE_DIR / 'media/')
+static = os.path.join(BASE_DIR / 'static')
+media = os.path.join(BASE_DIR / 'media')
 
 AUTH_USER_MODEL = 'accounts.User'
 # Application definition
@@ -51,6 +51,7 @@ AUTH_USER_MODEL = 'accounts.User'
 INSTALLED_APPS = [
     'accounts',
     'homepage',
+    'rides',
     'rest_framework',
     'rest_framework.authtoken',
     'drf_yasg',
@@ -175,19 +176,23 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = '/static'
+STATIC_ROOT = '/static/'
 STATICFILES_DIRS = (static, )
 # Media files (User-uploaded content)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = media
 
 # Email configuration
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+if IS_PRODUCTION:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+else:
+    EMAIL_BACKEND = 'ridechain.insecure_email.InsecureEmailBackend'  # Use the custom insecure email backend
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = env('EMAIL_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_PASS')
+EMAIL_HOST_USER = env('EMAIL_USER')  # Your Google Workspace email address
+EMAIL_HOST_PASSWORD = env('EMAIL_PASS') # The 16-character App Password you generated
+DEFAULT_FROM_EMAIL = 'admin@arcaccra.org'  # Default sender email address
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

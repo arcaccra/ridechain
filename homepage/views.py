@@ -1,6 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.template.loader import render_to_string
 from django.views import View
-from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.contrib import messages
 from accounts.forms import SubscriberForm
@@ -8,7 +8,7 @@ from accounts.models import Subscriber
 import os
 import random
 from django.conf import settings
-from utilities.mailing_and_messaging import send_welcome_email  # Import the send_welcome_email function
+from utilities.mailing_and_messaging import SendMail  # Import the send_welcome_email function
 
 
 class HomePageView(View):
@@ -40,13 +40,22 @@ class HomePageView(View):
         """Handles POST requests to process the subscriber form."""
         form = self.form_class(request.POST)
         if form.is_valid():
-            subscriber = form.save()  # Save the form and get the subscriber instance
-            messages.success(request, f'Welcome to RideChain, {subscriber.name}! We are excited to have you join our community. We will keep you updated. Thank you for subscribing!')
-
-            # Send welcome email
-            send_welcome_email([subscriber.email],
-                               subscriber.name)  # Assuming your Subscriber model has 'email' and 'name' fields
-            return HttpResponseRedirect(self.success_url)
+            subscriber = form.save(commit=False)  # Save the form and get the subscriber instance
+            html_message = render_to_string('welcome_email.html', {'subscriber': subscriber})
+            mailer = SendMail(
+                subject='Welcome to RideChain',
+                message='Thank you for subscribing to RideChain!',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[subscriber.email],
+                fail_silently=False
+            )
+            mailer.send_html_mail(html_message)
+            subscriber.save()
+            messages.success(
+                request,
+                f'Welcome to RideChain, {subscriber.name}! We are excited to have you join our community. We will keep you updated. Thank you for subscribing!'
+            )
+            return redirect (self.success_url)
         else:
             messages.error(request, 'There was an error with your subscription. Please try again.')
             subscribers = Subscriber.objects.all()

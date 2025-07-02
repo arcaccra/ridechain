@@ -183,16 +183,19 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = media
 
 # Email configuration
+# Use the custom insecure email backend
 if IS_PRODUCTION:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 else:
-    EMAIL_BACKEND = 'ridechain.insecure_email.InsecureEmailBackend'  # Use the custom insecure email backend
+    EMAIL_BACKEND = 'ridechain.insecure_email.InsecureEmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = env('EMAIL_USER')  # Your Google Workspace email address
 EMAIL_HOST_PASSWORD = env('EMAIL_PASS') # The 16-character App Password you generated
-DEFAULT_FROM_EMAIL = 'admin@arcaccra.org'  # Default sender email address
+EMAIL_TIMEOUT = 10  # seconds
+# Default sender email address matches the authenticated host user for consistency
+DEFAULT_FROM_EMAIL = 'RideChain <' + EMAIL_HOST_USER + '>'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

@@ -1,25 +1,29 @@
-from django.core.mail import EmailMultiAlternatives
+from django.core.mail import send_mail, EmailMessage
 from django.conf import settings
-from django.template.loader import render_to_string
 
-def send_templated_email(recipient_list, template_name, subject, context):
-    try:
-        html_content = render_to_string(template_name, context)
-        text_content = "This email requires an HTML-compatible email client."  # Or render a plain text template if you have one
+class SendMail:
+    """Sends mail using the django email backend."""
 
-        msg = EmailMultiAlternatives(subject, text_content, settings.EMAIL_HOST_USER, recipient_list)
-        msg.attach_alternative(html_content, "text/html")
-        msg.send()
-        return True
-    except Exception as e:
-        print(f"Error sending email: {e}")
-        return False
+    def __init__(self, subject, message, from_email, recipient_list, fail_silently=False):
+        self.subject = subject
+        self.message = message
+        self.from_email = from_email
+        self.recipient_list = recipient_list
+        self.fail_silently = fail_silently
 
-def send_welcome_email(recipient_list, username):
-    context = {'username': username}
-    return send_templated_email(recipient_list, 'welcome_email.html', "Welcome to our platform!", context)
+    def send_mail(self):
+        """Sends a plain text email."""
+        send_mail(self.subject, self.message, self.from_email, self.recipient_list, self.fail_silently)
 
+    def send_html_mail(self, html_message):
+        """Sends an HTML email."""
+        msg = EmailMessage(self.subject, html_message, self.from_email, self.recipient_list)
+        msg.content_subtype = 'html'
+        msg.send(fail_silently=self.fail_silently)
 
-def send_verification_email(recipient_list, verification_url):
-    context = {'verification_url': verification_url}
-    return send_templated_email(recipient_list, 'verification_email.html', "Verify Your Email", context)
+    def send_attachment_mail(self, html_message, attachment_path, attachment_name):
+        """Sends an email with an attachment."""
+        msg = EmailMessage(self.subject, html_message, self.from_email, self.recipient_list)
+        msg.content_subtype = 'html'
+        msg.attach_file(attachment_path, attachment_name)
+        msg.send(fail_silently=self.fail_silently)

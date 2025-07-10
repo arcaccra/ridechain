@@ -29,7 +29,7 @@ router = routers.DefaultRouter()
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Minglex APIS",
+        title="RideChain APIS",
         default_version="v1",
         description="API documentation",
         terms_of_service="https://www.example.com/terms/",

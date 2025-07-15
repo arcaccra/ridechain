@@ -17,5 +17,6 @@ class ApiRootView(generics.GenericAPIView):
             'register': reverse_lazy('register', request=request, format=None),
             'login': reverse_lazy('login', request=request, format=None),
             'logout': reverse_lazy('logout', request=request, format=None),
+            'rides_apis': reverse_lazy('ride-list-root', request=request, format=None),
         }
         return Response(data)

@@ -1,7 +1,6 @@
 from django.db import models
 from accounts.models import Driver, User
 import uuid
-import secrets
 
 class Ride(models.Model):
     """
@@ -15,11 +14,11 @@ class Ride(models.Model):
     )
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)  # Set default
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE, related_name='rides', verbose_name='driver')
-    passenger = models.ForeignKey(User, on_delete=models.CASCADE, related_name='rides', verbose_name='passenger', null=True, blank=True)
-    departure_location = models.CharField(max_length=255)
-    destination = models.CharField(max_length=255)
-    departure_time = models.DateTimeField()
-    arrival_time = models.DateTimeField(null=True, blank=True)
+    passengers = models.ManyToManyField(User, related_name='rides', blank=True, verbose_name='passengers')
+    pick_up = models.DecimalField(max_digits=10, decimal_places=6, verbose_name='pick-up location', blank=True, null=True)
+    drop_off = models.DecimalField(max_digits=10, decimal_places=6, verbose_name='drop-off location', blank=True, null=True)
+    departure_time = models.DateTimeField(null=True, blank=True, verbose_name='departure time')
+    arrival_time = models.DateTimeField(blank=True, null=True , verbose_name='arrival time')
     seats_available = models.PositiveIntegerField(default=1)
     price_per_seat = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='UPCOMING')
@@ -32,4 +31,4 @@ class Ride(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"Ride {self.id} by {self.driver.user.full_name} from {self.departure_location} to {self.destination}"
+        return f"Ride {self.uuid} by {self.driver.user.full_name} from {self.pick_up} to {self.drop_off}"

@@ -5,5 +5,6 @@ from .views import ApiRootView
 urlpatterns = [
     path('', ApiRootView.as_view(), name='apis_root'),
     path('accounts/', include('apis.account_apis.urls')),
+    path('rides_apis/', include('apis.ride_apis.urls')),
 ]
 urlpatterns = format_suffix_patterns(urlpatterns)

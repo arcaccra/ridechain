@@ -3,7 +3,6 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate, login, logout
-from rest_framework.reverse import reverse
 from apis.permissions import IsUserOrReadOnly
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from .serializers import UserSerializer, UserUpdateSerializer, LogoutSerializer, DriverSerializer

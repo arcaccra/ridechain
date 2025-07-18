@@ -1,3 +1,4 @@
+import random
 from django.shortcuts import render, redirect, HttpResponse
 from django.template.loader import render_to_string
 from django.views import View

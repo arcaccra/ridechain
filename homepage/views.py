@@ -1,5 +1,5 @@
 import os
-from random import random
+import random
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
 from django.views import View

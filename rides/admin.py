@@ -1,5 +1,12 @@
 from django.contrib import admin
-from .models import Ride
+from .models import Ride, Location
+
+@admin.register(Location)
+class LocationAdmin(admin.ModelAdmin):
+    list_display = ('name', 'latitude', 'longitude')
+    search_fields = ('name',)
+    readonly_fields = ('created_at', 'updated_at')
+    list_filter = ('created_at',)
 
 @admin.register(Ride)
 class RideAdmin(admin.ModelAdmin):

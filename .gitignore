@@ -2,9 +2,10 @@ db.sqlite3
 ridechain/.env
 
 # All Migrations
-#**/migrations/
+**/migrations/
 
 # macOS
+*.DS_Store
 **/.DS_Store
 
 # IDE
@@ -16,3 +17,4 @@ __pycache__/
 
 # Media Files
 media/
+

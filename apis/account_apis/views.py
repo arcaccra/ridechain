@@ -1,12 +1,14 @@
 from django.http import Http404
+from rest_framework.reverse import reverse_lazy
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate, login, logout
 from apis.permissions import IsUserOrReadOnly
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from .serializers import UserSerializer, UserUpdateSerializer, LogoutSerializer, DriverSerializer
+from .serializers import UserSerializer, UserUpdateSerializer, LoginSerializer, LogoutSerializer, DriverSerializer
 from accounts.models import User, Driver
+from ..views import EmptySerializer
 
 
 # User List
@@ -37,7 +39,7 @@ class RegisterView(generics.CreateAPIView):
 
 # Login View
 class LoginView(generics.GenericAPIView):
-    serializer_class = UserSerializer
+    serializer_class = LoginSerializer
 
     @staticmethod
     def post(request):
@@ -46,7 +48,7 @@ class LoginView(generics.GenericAPIView):
             login(request, user)
             token, created = Token.objects.get_or_create(user=user)
             user_serializer = UserSerializer(user, context={"request": request})
-            return Response({"token": token.key, "user": user_serializer.data}, status=status.HTTP_200_OK)
+            return Response({"success": "You successfully logged in", "token": token.key, "user": user_serializer.data}, status=status.HTTP_200_OK)
         else:
             return Response({"error": "Wrong Credentials"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -68,7 +70,7 @@ class LogoutView(generics.GenericAPIView):
 class UserDetailView(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAdminUser | IsUserOrReadOnly]
 
     def retrieve(self, request, *args, **kwargs):
         # Call the superclass method to get the standard retrieval of the user instance,
@@ -107,14 +109,14 @@ class UserUpdateView(generics.UpdateAPIView):
         instance = serializer.instance
         if 'avatar' in self.request.FILES:
             avatar_file = self.request.FILES['avatar']
-            serializer.save(banner=avatar_file)
+            serializer.save(avatar=avatar_file)
         else:
             # Set the avatar to the current file before saving
             current_avatar = instance.avatar
-            instance = serializer.save(avatar=current_avatar)
+            serializer.save(avatar=current_avatar)
 
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def patch(self, request, *args, **kwargs):
+        return self.put(request, *args, **kwargs)
 
 
 # Driver List View
@@ -186,5 +188,29 @@ class DriverUpdateView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, *args, **kwargs):
+        driver = self.get_object()
+        if driver.user == request.user or request.user.is_staff:
+            driver.delete()
+            return Response({"message": "Driver profile deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+        else:
+            raise PermissionDenied("You do not have permission to delete this driver profile.")
+
+
+class AccountRootView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = EmptySerializer
+
+    def get(self, request, *args, **kwargs):
+        data = {
+            'users': reverse_lazy('user-list', request=request, format=None),
+            'register': reverse_lazy('user-register', request=request, format=None),
+            'login': reverse_lazy('user-login', request=request, format=None),
+            'logout': reverse_lazy('user-logout', request=request, format=None),
+            'drivers': reverse_lazy('driver-list', request=request, format=None),
+        }
+        return Response(data)
+
 
 

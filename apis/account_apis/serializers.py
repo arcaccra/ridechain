@@ -1,3 +1,4 @@
+from django.contrib.auth import authenticate
 from rest_framework import serializers
 from accounts.models import User, Driver
 
@@ -9,8 +10,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            'id', 'avatar', 'full_name', 'email', 'country', 'phone_number', 'password1', 'password2', 'is_active',
-            'is_driver',)
+            'id', 'avatar', 'full_name', 'email', 'country', 'phone_number', 'password1', 'password2')
 
     def validate(self, data):
         if data['password1'] != data['password2']:
@@ -23,7 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
             full_name=validated_data['full_name'],
             email=validated_data['email'],
             country=validated_data['country'],
-            phone=validated_data['phone']
+            phone_number=validated_data['phone_number']
         )
         user.set_password(validated_data['password1'])
         user.save()
@@ -54,14 +54,25 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         fields = ('avatar', 'full_name', 'email', 'country', 'phone_number')
 
 
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        user = authenticate(username=data['email'], password=data['password'])
+        if user is None:
+            raise serializers.ValidationError("Invalid credentials")
+        return data
+
+
+class LogoutSerializer(serializers.Serializer):
+    pass
+
+
 class DriverSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
 
     class Meta:
         model = Driver
-        fields = ('id', 'user', 'id_type', 'id_number', 'vehicle_plate_number', 'vehicle_type', 'vehicle_color', 'approved',
-                  'date_created', 'date_updated')
+        fields = ('id', 'user', 'id_type', 'id_number', 'vehicle_plate_number', 'vehicle_type', 'vehicle_color', 'date_created', 'date_updated')
 
-
-class LogoutSerializer(serializers.Serializer):
-    pass

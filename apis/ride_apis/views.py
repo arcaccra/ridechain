@@ -4,6 +4,7 @@ from rest_framework.reverse import reverse_lazy
 from .serializers import RideListSerializer, RideDetailSerializer
 from rides.models import Ride
 from apis.permissions import IsUserOrReadOnly
+from ..views import EmptySerializer
 
 
 class RideListView(generics.ListCreateAPIView):
@@ -61,6 +62,7 @@ class RideDetailView(generics.RetrieveUpdateDestroyAPIView):
 # Root View for Ride APIs
 class RideRootView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
+    serializer_class = EmptySerializer
 
     def get(self, request, *args, **kwargs):
         return Response({

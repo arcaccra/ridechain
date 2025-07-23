@@ -14,5 +14,6 @@ class ApiRootView(generics.GenericAPIView):
         data = {
             'accounts': reverse_lazy('account-root', request=request, format=None),
             'rides_apis': reverse_lazy('ride-list-root', request=request, format=None),
+            'book_rate_apis': reverse_lazy('booking-list', request=request, format=None),
         }
         return Response(data)

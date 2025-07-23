@@ -1,15 +1,22 @@
+from functools import partial
+
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.reverse import reverse_lazy
-from .serializers import RideListSerializer, RideDetailSerializer
+from rest_framework.exceptions import PermissionDenied
+from .serializers import RideListSerializer, RideDetailSerializer, RideUpdateSerializer
 from rides.models import Ride
-from apis.permissions import IsUserOrReadOnly
+from apis.permissions import IsUserOrReadOnly, IsDriverOrReadOnly
 from ..views import EmptySerializer
 
 
 class RideListView(generics.ListCreateAPIView):
     serializer_class = RideListSerializer
-    permission_classes = [permissions.IsAuthenticated]
+
+    def get_permissions(self):
+        if self.request.method in ['POST']:
+            return [permissions.IsAuthenticated()]
+        return [permissions.IsAuthenticatedOrReadOnly()]
 
     def get_queryset(self):
         user = self.request.user
@@ -37,26 +44,72 @@ class RideListView(generics.ListCreateAPIView):
         return Response({'success': 'Ride Created Successfully', **response.data}, status=status.HTTP_201_CREATED)
 
 
-class RideDetailView(generics.RetrieveUpdateDestroyAPIView):
+class RideDetailView(generics.RetrieveAPIView):
     serializer_class = RideDetailSerializer
     queryset = Ride.objects.all()
     permission_classes = [permissions.IsAuthenticated, IsUserOrReadOnly | permissions.IsAdminUser]
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        return queryset.filter(driver=self.request.user.driver)
 
-    def get(self, request, *args, **kwargs):
-        response = super().get(request, *args, **kwargs)
-        return Response(response.data, status=status.HTTP_200_OK)
+class RideUpdateView(generics.GenericAPIView):
+    serializer_class = RideUpdateSerializer
+    queryset = Ride.objects.all()
+    permission_classes = [permissions.IsAuthenticated, IsDriverOrReadOnly | permissions.IsAdminUser]
+
+    @staticmethod
+    def check_driver_permission(instance, user):
+        # Ensure the user is the driver of the ride
+        if instance.driver != user.driver:
+            raise PermissionDenied("You can only update your own rides.")
+
+    def get (self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.check_driver_permission(instance, request.user)
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
 
     def put(self, request, *args, **kwargs):
-        response = super().put(request, *args, **kwargs)
-        return Response(response.data, status=status.HTTP_200_OK)
+        self.update(request, *args, **kwargs)
 
-    def delete(self, request, *args, **kwargs):
-        response = super().delete(request, *args, **kwargs)
-        return Response({}, status=status.HTTP_204_NO_CONTENT)
+    def patch(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs, partial=True)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', True)
+        instance = self.get_object()
+        self.check_driver_permission(instance, request.user)
+
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response({'success': 'Ride Updated Successfully', **serializer.data}, status=status.HTTP_200_OK)
+
+    def perform_update(self, serializer):
+        instance = serializer.instance
+        serializer = self.get_serializer(instance)
+        return Response (serializer.data, status=status.HTTP_200_OK)
+
+
+class RideBookingAPIView(generics.GenericAPIView):
+    serializer_class = RideListSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        ride_id = kwargs.get('ride_id')
+        try:
+            ride = Ride.objects.get(uuid=ride_id)
+        except Ride.DoesNotExist:
+            return Response({'detail': 'Ride not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if request.user.is_authenticated and not request.user.is_driver:
+            ride.passengers.add(request.user)
+            ride.seats_available -= 1
+            ride.save()
+            return Response({'success': 'Ride booked successfully.'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'detail': 'You must be a registered user to book a ride.'}, status=status.HTTP_403_FORBIDDEN)
+
+
 
 
 # Root View for Ride APIs

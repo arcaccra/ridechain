@@ -4,7 +4,7 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate, login, logout
-from apis.permissions import IsUserOrReadOnly
+from apis.permissions import IsUserOrReadOnly, IsDriverOrReadOnly
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from .serializers import UserSerializer, UserUpdateSerializer, LoginSerializer, LogoutSerializer, DriverSerializer
 from accounts.models import User, Driver
@@ -133,7 +133,7 @@ class DriverListView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         user = self.request.user
         if user.is_driver:
-            raise PermissionDenied("The user is already a driver.")
+            raise PermissionDenied("You are already a driver.")
 
         if not user.is_authenticated:
                 raise PermissionDenied("You must be logged in to create a driver profile.")

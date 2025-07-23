@@ -1,6 +1,7 @@
 from django.db import models
 from accounts.models import Driver, User
 import uuid
+from utilities.options import RIDE_STATUSES
 
 class Location(models.Model):
     name = models.CharField(max_length=255)
@@ -18,12 +19,6 @@ class Ride(models.Model):
     """
     Represents a ride offered by a driver.
     """
-    STATUS_CHOICES = (
-        ('UPCOMING', 'Upcoming'),
-        ('IN_PROGRESS', 'In Progress'),
-        ('COMPLETED', 'Completed'),
-        ('CANCELLED', 'Cancelled'),
-    )
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)  # Set default
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE, related_name='rides', verbose_name='driver')
     passengers = models.ManyToManyField(User, related_name='rides', blank=True, verbose_name='passengers')
@@ -33,7 +28,7 @@ class Ride(models.Model):
     arrival_time = models.DateTimeField(blank=True, null=True , verbose_name='arrival time')
     seats_available = models.PositiveIntegerField(default=1)
     price_per_seat = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='UPCOMING')
+    status = models.CharField(max_length=20, choices=RIDE_STATUSES, default='requested', verbose_name='ride status')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

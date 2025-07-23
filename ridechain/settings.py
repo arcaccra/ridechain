@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'accounts',
     'homepage',
     'rides',
+    'book_rate',
     'rest_framework',
     'rest_framework.authtoken',
     'drf_yasg',

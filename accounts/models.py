@@ -90,6 +90,7 @@ class Driver(models.Model):
     date_created = models.DateTimeField(auto_now_add=True, verbose_name=_('date created'))
     date_updated = models.DateTimeField(auto_now=True, verbose_name=_('date updated'))
     approved = models.BooleanField(default=False, verbose_name=_('approved'))
+    online = models.BooleanField(default=False, verbose_name=_('online'))
 
     class Meta:
         verbose_name = _('driver')
@@ -101,7 +102,7 @@ class Driver(models.Model):
 
 
 class Subscriber(models.Model):
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=False, verbose_name='Email Address')
     name = models.CharField(max_length=100, blank=True, null=True)
     accepted_mailing = models.BooleanField(default=False)
     create_date = models.DateTimeField(auto_now_add=True)

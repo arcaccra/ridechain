@@ -1,48 +1,58 @@
 import qrcode
-import io
-from django.core.files.base import ContentFile
-from PIL import Image
+import json
+from qrcode.image.styledpil import StyledPilImage
+from qrcode.image.styles.moduledrawers import RoundedModuleDrawer
+from qrcode.image.styles.colormasks import SolidFillColorMask
+from io import BytesIO
+import base64
+
 
 class QRCodeGenerator:
-    """
-    Generates and saves a QR code to a model instance.
-    """
     def __init__(
         self,
-        instance,
-        box_size=10,
-        border=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_L
+        version: int = 2,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size: int = 10,
+        border: int = 4,
+        front_color=(40, 90, 200),
+        back_color=(255, 255, 255),
     ):
-        self.instance = instance
-        self.qr = qrcode.QRCode(
-            version=1,
-            error_correction=error_correction,
-            box_size=box_size,
-            border=border
+        self.version = version
+        self.error_correction = error_correction
+        self.box_size = box_size
+        self.border = border
+        self.front_color = front_color
+        self.back_color = back_color
+
+    def generate(self, data: str) -> BytesIO:
+        """
+        Generates a stylized QR code containing the given data.
+
+        Args:
+            data (str): The data to encode in the QR code.
+
+        Returns:
+            BytesIO: An in-memory buffer containing the PNG image.
+        """
+        qr = qrcode.QRCode(
+            version=self.version,
+            error_correction=self.error_correction,
+            box_size=self.box_size,
+            border=self.border,
+        )
+        qr.add_data(data)
+        qr.make(fit=True)
+
+        img = qr.make_image(
+            image_factory=StyledPilImage,
+            module_drawer=RoundedModuleDrawer(),
+            color_mask=SolidFillColorMask(
+                front_color=self.front_color,
+                back_color=self.back_color
+            )
         )
 
-    def add_data(self, data):
-        self.qr.add_data(data)
-        self.qr.make(fit=True)
-
-    def save_qr_code(self, file_name=None):
-        if not hasattr(self.instance, 'qr_code_uuid'):
-            raise AttributeError("Instance missing `qr_code_uuid` attribute.")
-        if not hasattr(self.instance, 'qr_code'):
-            raise AttributeError("Instance missing `qr_code` field.")
-
-        img = self.qr.make_image(fill_color="black", back_color="white").convert("RGB")
-
-        if file_name is None:
-            file_name = f"qr_code_{self.instance.qr_code_uuid}.png"
-
-        img_byte_arr = io.BytesIO()
-        img.save(img_byte_arr, format='PNG')
-        img_byte_arr.seek(0)
-
-        content_file = ContentFile(img_byte_arr.read(), name=file_name)
-        try:
-            self.instance.qr_code.save(file_name, content_file, save=True)
-        except Exception as e:
-            raise IOError(f"Failed to save QR code file: {e}")
+        buffer = BytesIO()
+        img.save(buffer, format="PNG")
+        buffer.seek(0)
+        return buffer

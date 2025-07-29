@@ -41,13 +41,17 @@ class RegisterView(generics.CreateAPIView):
 class LoginView(generics.GenericAPIView):
     serializer_class = LoginSerializer
 
-    @staticmethod
-    def post(request):
+    def post(self, request):
         user = authenticate(request, username=request.data.get('email'), password=request.data.get('password'))
         if user is not None:
+            login(request, user)  # This sets the session for browser use
             token, created = Token.objects.get_or_create(user=user)
             user_serializer = UserSerializer(user, context={"request": request})
-            return Response({"success": "You successfully logged in", "token": token.key, "user": user_serializer.data}, status=status.HTTP_200_OK)
+            return Response({
+                "success": "You successfully logged in",
+                "token": token.key,
+                "user": user_serializer.data
+            }, status=status.HTTP_200_OK)
         else:
             return Response({"error": "Wrong Credentials"}, status=status.HTTP_400_BAD_REQUEST)
 

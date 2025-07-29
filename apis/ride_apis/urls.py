@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RideListView, RideDetailView, RideRootView, RideUpdateView, BookRideAPIView
+from .views import RideListView, RideDetailView, RideRootView, RideUpdateView, BookRideAPIView, BookRideVerificationAPIView
 
 urlpatterns = [
     # Ride APIs
@@ -9,6 +9,10 @@ urlpatterns = [
     path('rides/<uuid:pk>/update/', RideUpdateView.as_view(), name='ride-update'),
 
     path ('rides/<uuid:pk>/book/', BookRideAPIView.as_view(), name='book-ride'),
+
+    path('apis/<uuid:r>/bookings/', BookRideAPIView.as_view(), name='ride-booking-list'),
+
+    path('verify-booking/', BookRideVerificationAPIView.as_view(), name='booking-verification'),
 
     # Add more ride-related URLs as needed
 ]

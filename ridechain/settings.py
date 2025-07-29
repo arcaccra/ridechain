@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 import environ
+from corsheaders.defaults import default_headers
 
 # Initialise environment variables
 env = environ.Env()
@@ -168,6 +169,12 @@ CORS_ORIGIN_WHITELIST = [
     "http://127.0.0.1:3000",  # Local frontend (e.g., React)
     "https://api.paystack.co",  # Paystack API
     "http://localhost:5173", # Local development server for frontend
+]
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'authorization',
+    'content-type',
 ]
 
 # Internationalization

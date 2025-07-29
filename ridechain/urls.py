@@ -40,20 +40,21 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = ([
-    path('', include('homepage.urls')),
-    path('apis/', include('apis.urls')),
-   path(
-       "apis/docs/",
-       schema_view.with_ui("swagger", cache_timeout=0),
-       name="schema-swagger-ui",
-   ),
-   path(
-       "apis/redoc/",
-       schema_view.with_ui("redoc", cache_timeout=0),
-       name="schema-redoc",
-   ),
-    path('accounts/', include('accounts.urls')),
-    path('admin/', admin.site.urls),
-    path("api-auth/", include("rest_framework.urls")),
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-               + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT))
+                   path('', include('homepage.urls')),
+                   path('apis/', include('apis.urls')),
+                   path(
+                       "apis/docs/",
+                       schema_view.with_ui("swagger", cache_timeout=0),
+                       name="schema-swagger-ui",
+                   ),
+                   path(
+                       "apis/redoc/",
+                       schema_view.with_ui("redoc", cache_timeout=0),
+                       name="schema-redoc",
+                   ),
+                   path('admin/', admin.site.urls),
+                   path('accounts/', include('accounts.urls')),
+                   path("api-auth/", include("rest_framework.urls")),  # Include DRF auth URLs
+               ]
+               + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+               + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT))

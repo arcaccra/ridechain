@@ -133,10 +133,15 @@ class RideBookingValidationMixin:
         Generate a base64-encoded QR code pointing to a booking verification URL.
         """
         # Reverse the verification route name (must exist in urls.py)
-        relative_url = reverse('booking-verification')  # You should define this URL in your routing
-        full_url = request.build_absolute_uri(
-            f"{relative_url}?user_id={user_id}&ride_uuid={ride_uuid}&booking_qrcode_uuid={booking_qrcode_uuid}"
+        relative_url = reverse(
+            'booking-verification', 
+            kwargs={
+                'user_id': user_id, 
+                'ride_uuid': ride_uuid, 
+                'booking_qrcode_uuid': booking_qrcode_uuid
+            }
         )
+        full_url = request.build_absolute_uri(relative_url)
 
         qr_generator = QRCodeGenerator()
         return qr_generator.generate(full_url)
@@ -181,12 +186,9 @@ class BookRideVerificationAPIView(generics.GenericAPIView):
     serializer_class = EmptySerializer
 
     def get(self, request, *args, **kwargs):
-        user_id = request.query_params.get('user_id')
-        ride_uuid = request.query_params.get('ride_uuid')
-        booking_qrcode_uuid = request.query_params.get('booking_qrcode_uuid')
-
-        if not all([user_id, ride_uuid, booking_qrcode_uuid]):
-            return Response({'detail': 'Missing parameters.'}, status=status.HTTP_400_BAD_REQUEST)
+        user_id = self.kwargs.get('user_id')
+        ride_uuid = self.kwargs.get('ride_uuid')
+        booking_qrcode_uuid = self.kwargs.get('booking_qrcode_uuid')
 
         try:
             booking = RideBooking.objects.get(qrcode_uuid=booking_qrcode_uuid, passenger__id=user_id, ride__uuid=ride_uuid)

@@ -39,7 +39,13 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = APP_ENV != 'production'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    '*', 'localhost',
+    '127.0.0.1',
+    'yaw959.pythonahywhere.com',
+    'api.paystack.co',
+    'app.arcaccra.com'
+]
 
 templates = os.path.join(BASE_DIR, 'templates')
 static = os.path.join(BASE_DIR / 'static')
@@ -70,12 +76,12 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'ridechain.urls'
@@ -161,7 +167,7 @@ CORS_ORIGIN_WHITELIST = [
     "https://app.arcaccra.com",  # Production frontend
     "http://127.0.0.1:3000",  # Local frontend (e.g., React)
     "https://api.paystack.co",  # Paystack API
-    "http://localhost:5173" # Local development server for frontend
+    "http://localhost:5173", # Local development server for frontend
 ]
 
 # Internationalization

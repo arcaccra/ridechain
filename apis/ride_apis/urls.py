@@ -12,7 +12,7 @@ urlpatterns = [
 
     path('apis/<uuid:r>/bookings/', BookRideAPIView.as_view(), name='ride-booking-list'),
 
-    path('verify-booking/', BookRideVerificationAPIView.as_view(), name='booking-verification'),
+    path('verify-booking/<int:user_id>/<uuid:ride_uuid>/<uuid:booking_qrcode_uuid>/', BookRideVerificationAPIView.as_view(), name='booking-verification'),
 
     # Add more ride-related URLs as needed
 ]

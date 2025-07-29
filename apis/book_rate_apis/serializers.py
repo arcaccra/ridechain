@@ -26,6 +26,7 @@ class RideBookingSerializer(serializers.ModelSerializer):
 class RideBookingDetailSerializer(serializers.ModelSerializer):
     passenger = UserSerializer(read_only=True)
     ride = RideDetailSerializer(read_only=True)
+    ride_id = serializers.PrimaryKeyRelatedField(source='ride', read_only=True)
 
     class Meta:
         model = RideBooking
@@ -33,6 +34,7 @@ class RideBookingDetailSerializer(serializers.ModelSerializer):
             'id',
             'passenger',
             'ride',
+            'ride_id',
             'qrcode_uuid',
             'qr_code',
             'date_booked',
@@ -40,3 +42,15 @@ class RideBookingDetailSerializer(serializers.ModelSerializer):
             'updated_at'
         ]
         read_only_fields = ['id', 'qrcode_uuid', 'date_booked', 'created_at', 'updated_at']
+
+    def create(self, validated_data):
+        passenger = self.context['request'].user
+        ride = validated_data['ride']
+
+        # Prevent duplicate bookings
+        if RideBooking.objects.filter(passenger=passenger, ride=ride).exists():
+            raise serializers.ValidationError("You have already booked this ride.")
+
+        # Create the booking instance
+        booking = RideBooking.objects.create(passenger=passenger, ride=ride)
+        return booking

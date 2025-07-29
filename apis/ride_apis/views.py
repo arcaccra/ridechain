@@ -1,6 +1,4 @@
-from functools import partial
-
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions, status, serializers
 from rest_framework.response import Response
 from rest_framework.reverse import reverse_lazy
 from rest_framework.exceptions import PermissionDenied
@@ -8,6 +6,9 @@ from .serializers import RideListSerializer, RideDetailSerializer, RideUpdateSer
 from rides.models import Ride
 from apis.permissions import IsUserOrReadOnly, IsDriverOrReadOnly
 from ..views import EmptySerializer
+from book_rate.models import RideBooking
+from utilities.qr_code_module import QRCodeGenerator
+from apis.book_rate_apis.serializers import RideBookingSerializer, RideBookingDetailSerializer
 
 
 class RideListView(generics.ListCreateAPIView):
@@ -90,26 +91,27 @@ class RideUpdateView(generics.GenericAPIView):
         return Response (serializer.data, status=status.HTTP_200_OK)
 
 
-class RideBookingAPIView(generics.GenericAPIView):
-    serializer_class = RideListSerializer
+class BookRideAPIView(generics.CreateAPIView):
+    serializer_class = RideBookingDetailSerializer
     permission_classes = [permissions.IsAuthenticated]
+    queryset = RideBooking.objects.all()
 
-    def post(self, request, *args, **kwargs):
-        ride_id = kwargs.get('ride_id')
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Pass ride_id from URL to the serializer
+        ride_uuid = self.kwargs.get('pk')
         try:
-            ride = Ride.objects.get(uuid=ride_id)
+            ride = Ride.objects.get(uuid=ride_uuid)
         except Ride.DoesNotExist:
-            return Response({'detail': 'Ride not found.'}, status=status.HTTP_404_NOT_FOUND)
+            raise serializers.ValidationError("Ride does not exist.")
 
-        if request.user.is_authenticated and not request.user.is_driver:
-            ride.passengers.add(request.user)
-            ride.seats_available -= 1
-            ride.save()
-            return Response({'success': 'Ride booked successfully.'}, status=status.HTTP_200_OK)
-        else:
-            return Response({'detail': 'You must be a registered user to book a ride.'}, status=status.HTTP_403_FORBIDDEN)
+        # The serializer's create method now handles the booking logic
+        booking = serializer.save(ride=ride)
 
-
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 # Root View for Ride APIs

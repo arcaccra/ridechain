@@ -90,7 +90,7 @@ class Driver(models.Model):
     date_created = models.DateTimeField(auto_now_add=True, verbose_name=_('date created'))
     date_updated = models.DateTimeField(auto_now=True, verbose_name=_('date updated'))
     approved = models.BooleanField(default=False, verbose_name=_('approved'))
-    status = models.CharField(max_length=200, blank=True, null=True, deafult='Documents Submitted')
+    status = models.CharField(max_length=200, blank=True, null=True)
     online = models.BooleanField(default=False, verbose_name=_('online'))
 
     class Meta:

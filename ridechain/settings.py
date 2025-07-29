@@ -168,7 +168,7 @@ CORS_ORIGIN_WHITELIST = [
     "https://app.arcaccra.com",  # Production frontend
     "http://127.0.0.1:3000",  # Local frontend (e.g., React)
     "https://api.paystack.co",  # Paystack API
-    "http://localhost:5173", # Local development server for frontend
+    "localhost:5173", # Local development server for frontend
 ]
 CORS_ALLOW_CREDENTIALS = True
 

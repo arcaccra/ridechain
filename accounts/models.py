@@ -4,7 +4,7 @@ from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
 from rest_framework.authtoken.models import Token
-from utilities.options import ID_TYPES, VEHICLE_TYPES, VEHICLE_COLORS
+from utilities.options import ID_TYPES, VEHICLE_TYPES, VEHICLE_COLORS, DRIVER_STATUS_CHOICES
 
 
 # Create your models here.
@@ -90,6 +90,7 @@ class Driver(models.Model):
     date_created = models.DateTimeField(auto_now_add=True, verbose_name=_('date created'))
     date_updated = models.DateTimeField(auto_now=True, verbose_name=_('date updated'))
     approved = models.BooleanField(default=False, verbose_name=_('approved'))
+    status = models.CharField(max_length=200, blank=True, null=True, deafult='Documents Submitted')
     online = models.BooleanField(default=False, verbose_name=_('online'))
 
     class Meta:

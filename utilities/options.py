@@ -41,3 +41,11 @@ RIDE_STATUSES = (
     ('COMPLETED', 'Completed'),
     ('CANCELLED', 'Cancelled'),
 )
+
+DRIVER_STATUS_CHOICES = (
+    ('', 'Select Driver Status'),
+    ('Approved', 'Approved'),
+    ('Documents Submitted', 'Documents Submitted'),
+    ('Rejected', 'Rejected'),
+    ('Under Review', 'Under Review'),
+)

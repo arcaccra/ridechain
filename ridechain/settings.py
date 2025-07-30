@@ -154,9 +154,9 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     # List of authentication classes used for API requests
     "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.TokenAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
     ],
 }
 
@@ -171,11 +171,6 @@ CORS_ORIGIN_WHITELIST = [
     "http://localhost:5173", # Local development server for frontend
 ]
 CORS_ALLOW_CREDENTIALS = True
-
-CORS_ALLOW_HEADERS = list(default_headers) + [
-    'authorization',
-    'content-type',
-]
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/

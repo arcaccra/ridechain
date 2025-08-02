@@ -23,17 +23,21 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = UserSerializer
 
     def create(self, request, *args, **kwargs):
-        response = super().create(request, *args, **kwargs)
-        user = self.serializer_class.Meta.model.objects.get(pk=response.data['id'])
-        token, created = Token.objects.get_or_create(user=user)
-        user_serializer = self.get_serializer(user)
-        data = {
-            'message': 'Registration successful.',
-            'token': token.key,
-            'user': user_serializer.data
-        }
-        response.data = data
-        return response
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        if user:
+            token, created = Token.objects.get_or_create(user=user)
+            user_serializer = self.get_serializer(user)
+            headers = self.get_success_headers(serializer.data)
+            data = {
+                'message': 'Registration successful.',
+                'token': token.key,
+                'user': user_serializer.data
+            }
+            return Response(data, status=status.HTTP_201_CREATED, headers=headers)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # Login View

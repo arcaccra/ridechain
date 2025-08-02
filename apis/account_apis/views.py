@@ -9,6 +9,9 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from .serializers import UserSerializer, UserUpdateSerializer, LoginSerializer, LogoutSerializer, DriverSerializer
 from accounts.models import User, Driver
 from ..views import EmptySerializer
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 
 
 # User List
@@ -18,10 +21,18 @@ class UserListView(generics.ListAPIView):
     permission_classes = [permissions.IsAdminUser]
 
 
+# CSRF-exempt session authentication
+class CsrfExemptSessionAuthentication(SessionAuthentication):
+    def enforce_csrf(self, request):
+        return  # Disable CSRF check
+
+
 # Registration View
+@method_decorator(csrf_exempt, name='dispatch')
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    authentication_classes = [CsrfExemptSessionAuthentication, TokenAuthentication]
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
@@ -34,6 +45,9 @@ class RegisterView(generics.CreateAPIView):
             'user': user_serializer.data
         }
         response.data = data
+        # Allow user to login from mobile
+        if getattr(request, 'mobile', False):
+            login(request, user)
         return response
 
 

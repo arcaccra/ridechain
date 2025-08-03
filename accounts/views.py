@@ -4,6 +4,7 @@ from django.views import View
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView
+from rest_framework.authtoken.models import Token
 from django.contrib.auth import login, logout
 from .forms import (
     CustomAuthForm,
@@ -39,6 +40,9 @@ class UserRegisterView(CreateView):
         if avatar:
             self.object.avatar = avatar
             self.object.save()
+
+        # Generate a token for the user
+        Token.objects.get_or_create(user=self.object)
 
         login(self.request, self.object)
         return response

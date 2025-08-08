@@ -10,7 +10,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            'id', 'avatar', 'full_name', 'email', 'country', 'phone_number', 'password1', 'password2')
+            'id', 'avatar', 'full_name', 'email', 'country', 'current_location', 'phone_number', 'password1', 'password2')
 
     def validate(self, data):
         if data['password1'] != data['password2']:
@@ -44,14 +44,14 @@ class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            'id', 'avatar', 'full_name', 'email', 'country', 'phone_number', 'password', 'is_active', 'is_staff',
+            'id', 'avatar', 'full_name', 'email', 'country', 'phone_number', 'current_location', 'password', 'is_active', 'is_staff',
             'is_superuser', 'is_driver',)
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('avatar', 'full_name', 'email', 'country', 'phone_number')
+        fields = ('avatar', 'full_name', 'email', 'country', 'current_location', 'phone_number')
 
 
 class LoginSerializer(serializers.Serializer):

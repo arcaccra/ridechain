@@ -7,6 +7,10 @@ from rest_framework.authtoken.models import Token
 from utilities.options import ID_TYPES, VEHICLE_TYPES, VEHICLE_COLORS, DRIVER_STATUS_CHOICES
 
 
+def default_current_location():
+    return [0.00000, 0.00000]
+
+
 # Create your models here.
 
 class UserManager(BaseUserManager):
@@ -61,6 +65,14 @@ class User(AbstractUser):
     )
     phone_number = models.CharField(max_length=15, blank=True, null=True, verbose_name=_('phone number') ,validators=[phone_regex])
     country = CountryField(blank=True, null=True, verbose_name=_('country'), default='GH')
+    # Removed latitude and longitude fields; replaced with a single JSONField for coordinates.
+    current_location = models.JSONField(
+        blank=True,
+        null=True,
+        verbose_name=_('current location'),
+        help_text=_('Store as [latitude, longitude]'),
+        default=default_current_location
+    )
     date_joined = models.DateTimeField(auto_now_add=True, verbose_name=_('date joined'))
     is_active = models.BooleanField(default=True, verbose_name=_('is active'))
     is_staff = models.BooleanField(default=False, verbose_name=_('is staff'))
@@ -114,6 +126,4 @@ class Subscriber(models.Model):
 
     def __str__(self):
         return self.email
-
-
 

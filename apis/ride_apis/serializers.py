@@ -8,7 +8,7 @@ from apis.account_apis.serializers import UserSerializer, DriverSerializer
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
-        fields = ['name', 'latitude', 'longitude']
+        fields = ['id', 'name', 'latitude', 'longitude']
         read_only_fields = ['latitude', 'longitude']
 
 class RideListSerializer(serializers.ModelSerializer):

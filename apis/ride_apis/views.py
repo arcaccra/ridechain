@@ -6,13 +6,32 @@ from rest_framework.reverse import reverse_lazy
 from rest_framework.exceptions import PermissionDenied
 from django.core.files.base import ContentFile
 from io import BytesIO
-from .serializers import RideListSerializer, RideDetailSerializer, RideUpdateSerializer
-from rides.models import Ride
+from .serializers import RideListSerializer, RideDetailSerializer, RideUpdateSerializer, LocationSerializer
+from rides.models import Ride, Location
 from apis.permissions import IsUserOrReadOnly, IsDriverOrReadOnly
 from ..views import EmptySerializer
 from book_rate.models import RideBooking
 from utilities.qr_code_module import QRCodeGenerator
 from apis.book_rate_apis.serializers import RideBookingSerializer, RideBookingDetailSerializer
+
+
+class LocationListView(generics.ListCreateAPIView):
+    serializer_class = LocationSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        return Location.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        return Response(response.data, status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        return Response({'success': 'Location Created Successfully', **response.data}, status=status.HTTP_201_CREATED)
 
 
 class RideListView(generics.ListCreateAPIView):
@@ -207,4 +226,5 @@ class RideRootView(generics.GenericAPIView):
     def get(self, request, *args, **kwargs):
         return Response({
             'rides': reverse_lazy('ride-list', request=request),
+            'locations': reverse_lazy('location-list', request=request),
         })

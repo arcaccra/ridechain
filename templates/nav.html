@@ -1,10 +1,10 @@
 {% load static %}
-<nav class="fixed top-0 w-full z-10 purple-bg z-[999]">
-    <div class="w-full px-12 py-8 flex justify-between">
+<nav class="fixed top-0 w-full purple-bg z-[999]">
+    <div class="w-full px-4 md:px-12 py-4 md:py-8 flex items-center justify-between">
         <a href="{% url 'home' %}" class="text-2xl font-bold text-white">
             <img src="{% static 'images/logo_new.png' %}" alt="app_logo" class="w-10 h-auto inline-block mr-2">
         </a>
-        <ul class="flex items-center ">
+        <ul class="hidden md:flex items-center">
             <li class="mr-6">
                 <a href="#" class="text-[13px] text-purple-200 font-light hover:text-white">
                     About
@@ -38,8 +38,9 @@
                 <a href="#" class="text-[13px] text-purple-200 font-light hover:text-white">
                     Get Help
                 </a>
+            </li>
         </ul>
-        <ul class="flex items-center">
+        <ul class="hidden md:flex items-center">
             {% if user.is_authenticated %}
                 <li class="relative">
 
@@ -90,18 +91,125 @@
                 </a>
             {% endif %}
         </ul>
-
+<button id="mobileMenuButton" aria-label="Open menu" class="md:hidden inline-flex items-center justify-center h-10 w-10 rounded-lg border border-yellow-400 text-yellow-400">
+  <span class="material-symbols-outlined">menu</span>
+</button>
     </div>
 </nav>
 
+<!-- Mobile Drawer Overlay -->
+<div id="drawerOverlay" class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-[998]"></div>
+
+<!-- Mobile Navigation Drawer -->
+<aside id="mobileDrawer" class="fixed top-0 right-0 h-full w-80 max-w-full purple-bg text-white shadow-2xl transform translate-x-full transition-transform duration-300 z-[999]">
+  <div class="px-4 py-4 flex items-center justify-between border-b border-white/10">
+    <a href="{% url 'home' %}" class="inline-flex items-center">
+      <img src="{% static 'images/logo_new.png' %}" alt="app_logo" class="w-8 h-auto inline-block mr-2">
+      <span class="text-lg font-semibold">RideChain</span>
+    </a>
+    <button id="closeDrawer" aria-label="Close menu" class="inline-flex items-center justify-center h-10 w-10 rounded-lg border border-yellow-400 text-yellow-400">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </div>
+  <nav class="px-4 py-3">
+    <ul class="space-y-1">
+      <li>
+        <a href="#" class="block px-3 py-2 rounded-md text-purple-100 hover:text-white hover:bg-white/10">About</a>
+      </li>
+      <li>
+        <a href="{% url 'blog' %}" class="block px-3 py-2 rounded-md text-purple-100 hover:text-white hover:bg-white/10">Blog</a>
+      </li>
+      <li>
+        <a href="{% url 'community' %}" class="block px-3 py-2 rounded-md text-purple-100 hover:text-white hover:bg-white/10">Community</a>
+      </li>
+      <li>
+        <a href="#" class="block px-3 py-2 rounded-md text-purple-100 hover:text-white hover:bg-white/10">Get Help</a>
+      </li>
+      {% if user.is_authenticated and user.is_staff %}
+      <li class="pt-2 border-t border-white/10">
+        <a href="{% url 'schema-redoc' %}" target="_blank" class="block px-3 py-2 rounded-md text-purple-100 hover:text-white hover:bg-white/10">API Docs</a>
+      </li>
+      <li>
+        <a href="{% url 'apis_root' %}" target="_blank" class="block px-3 py-2 rounded-md text-purple-100 hover:text-white hover:bg-white/10">Test APIs</a>
+      </li>
+      {% endif %}
+    </ul>
+
+    <div class="mt-4 pt-4 border-t border-white/10">
+      {% if user.is_authenticated %}
+      <p class="px-3 pb-2 text-sm text-purple-200">Signed in as <span class="font-medium text-white">{{ user.username }}</span></p>
+      <ul class="space-y-1">
+        <li>
+          <a href="{% url 'profile' %}" class="block px-3 py-2 rounded-md text-purple-100 hover:text-white hover:bg-white/10">Profile</a>
+        </li>
+        <li>
+          <a href="#" class="block px-3 py-2 rounded-md text-purple-100 hover:text-white hover:bg-white/10">Settings</a>
+        </li>
+        <li>
+          <a href="{% url 'logout' %}" class="block px-3 py-2 rounded-md text-purple-100 hover:text-white hover:bg-white/10">Logout</a>
+        </li>
+        <li>
+          <a href="{% url 'admin:index' %}" class="block px-3 py-2 rounded-md text-purple-100 hover:text-white hover:bg-white/10">Dashboard</a>
+        </li>
+      </ul>
+      {% else %}
+      <ul class="space-y-2">
+        <li>
+          <a href="{% url 'login' %}" class="block px-3 py-2 rounded-md text-purple-900 bg-white hover:bg-yellow-400 hover:text-purple-900 transition">Login</a>
+        </li>
+        <li>
+          <a href="{% url 'register' %}" class="block px-3 py-2 rounded-md border border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-purple-900 transition">Sign Up</a>
+        </li>
+      </ul>
+      {% endif %}
+    </div>
+  </nav>
+</aside>
+
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const userMenu = document.querySelector('.relative');
-        userMenu.addEventListener('mouseover', function () {
-            this.querySelector('.absolute').classList.remove('hidden');
-        });
-        userMenu.addEventListener('mouseout', function () {
-            this.querySelector('.absolute').classList.add('hidden');
-        });
+  document.addEventListener('DOMContentLoaded', function () {
+    // Avatar hover (desktop)
+    const userMenu = document.querySelector('li.relative');
+    if (userMenu) {
+      const dropdown = userMenu.querySelector('.absolute');
+      userMenu.addEventListener('mouseover', function () {
+        dropdown && dropdown.classList.remove('hidden');
+      });
+      userMenu.addEventListener('mouseout', function () {
+        dropdown && dropdown.classList.add('hidden');
+      });
+    }
+
+    // Mobile drawer controls
+    const openBtn = document.getElementById('mobileMenuButton');
+    const closeBtn = document.getElementById('closeDrawer');
+    const drawer = document.getElementById('mobileDrawer');
+    const overlay = document.getElementById('drawerOverlay');
+
+    function openDrawer() {
+      drawer.classList.remove('translate-x-full');
+      overlay.classList.remove('opacity-0', 'pointer-events-none');
+      // Focus close button for accessibility
+      setTimeout(() => closeBtn && closeBtn.focus(), 0);
+    }
+
+    function closeDrawer() {
+      drawer.classList.add('translate-x-full');
+      overlay.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    openBtn && openBtn.addEventListener('click', openDrawer);
+    closeBtn && closeBtn.addEventListener('click', closeDrawer);
+    overlay && overlay.addEventListener('click', closeDrawer);
+
+    // Close on ESC
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeDrawer();
     });
+
+    // Auto-close when clicking any link in the drawer
+    drawer && drawer.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', closeDrawer);
+    });
+  });
 </script>

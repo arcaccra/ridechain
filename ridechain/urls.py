@@ -54,6 +54,7 @@ urlpatterns = ([
                    ),
                    path('admin/', admin.site.urls),
                    path('accounts/', include('accounts.urls')),
+                     path('community/', include('community.urls')),
                    path("api-auth/", include("rest_framework.urls")),  # Include DRF auth URLs
                ]
                + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

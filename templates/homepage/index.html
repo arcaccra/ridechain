@@ -55,9 +55,9 @@
                                 <div class="w-auto h-12 md:h-16 px-4 md:px-6 rounded-full border-4 purple-border bg-yellow-400 flex items-center justify-center">
                                     <p class="purple header-font font-bold">
                                         {% if subscribers.count > 5 %}
-                                            <span>+{{ subscribers.count|add:"-5" }} Waiting</span>
+                                            <span>+{{ subscribers.count|add:"-5" }} <span class="hidden md:inline">Waiting</span></span>
                                         {% else %}
-                                            <span>{{ subscribers.count }} Waiting</span>
+                                            <span>{{ subscribers.count }} <span class="hidden md:inline">Waiting</span></span>
                                         {% endif %}
                                     </p>
                                 </div>

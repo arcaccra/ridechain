@@ -6,6 +6,7 @@ from rest_framework.reverse import reverse_lazy
 from rest_framework.exceptions import PermissionDenied
 from django.core.files.base import ContentFile
 from io import BytesIO
+from django.db.models import Q
 from .serializers import RideListSerializer, RideDetailSerializer, RideUpdateSerializer, LocationSerializer
 from rides.models import Ride, Location
 from apis.permissions import IsUserOrReadOnly, IsDriverOrReadOnly
@@ -20,6 +21,9 @@ class LocationListView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
+        q = self.request.query_params.get('q')
+        if q:
+            return Location.objects.filter(name__icontains=q)
         return Location.objects.all()
 
     def perform_create(self, serializer):
@@ -32,6 +36,9 @@ class LocationListView(generics.ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
         return Response({'success': 'Location Created Successfully', **response.data}, status=status.HTTP_201_CREATED)
+
+
+
 
 
 class RideListView(generics.ListCreateAPIView):
@@ -66,6 +73,47 @@ class RideListView(generics.ListCreateAPIView):
             )
         response = super().post(request, *args, **kwargs)
         return Response({'success': 'Ride Created Successfully', **response.data}, status=status.HTTP_201_CREATED)
+
+
+class RideSearchView(generics.ListAPIView):
+    """
+    Mobile-friendly ride search by location names.
+    Query params:
+      - q: matches either pick_up or drop_off location name (case-insensitive)
+      - pick_up: matches pick_up location name (case-insensitive)
+      - drop_off: matches drop_off location name (case-insensitive)
+    If none of the above params are provided, returns an empty queryset.
+    """
+    serializer_class = RideListSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        # Expecting Ride to have ForeignKeys: pick_up and drop_off to Location
+        pickup_param = self.request.query_params.get('pick_up')
+        dropoff_param = self.request.query_params.get('drop_off')
+        q_param = self.request.query_params.get('q')
+
+        qs = Ride.objects.all()
+        filters = Q()
+
+        if q_param:
+            filters |= Q(pick_up__name__icontains=q_param)
+            filters |= Q(drop_off__name__icontains=q_param)
+
+        if pickup_param:
+            filters &= Q(pick_up__name__icontains=pickup_param)
+
+        if dropoff_param:
+            filters &= Q(drop_off__name__icontains=dropoff_param)
+
+        if not (q_param or pickup_param or dropoff_param):
+            return Ride.objects.none()
+
+        return qs.filter(filters).distinct()
+
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        return Response(response.data, status=status.HTTP_200_OK)
 
 
 class RideDetailView(generics.RetrieveAPIView):

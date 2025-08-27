@@ -15,5 +15,9 @@ urlpatterns = [
 
     path('verify-booking/<int:user_id>/<uuid:ride_uuid>/<uuid:booking_qrcode_uuid>/', BookRideVerificationAPIView.as_view(), name='booking-verification'),
 
+    path('rides/search/', RideSearchView.as_view(), name='ride-search'),
+    path('locations/search/', LocationListView.as_view(), name='location-search'),
+
     # Add more ride-related URLs as needed
+
 ]

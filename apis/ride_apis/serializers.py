@@ -13,8 +13,8 @@ class LocationSerializer(serializers.ModelSerializer):
 
 class RideListSerializer(serializers.ModelSerializer):
     driver = DriverSerializer(read_only=True)
-    pick_up = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all())
-    drop_off = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all())
+    pick_up = LocationSerializer(read_only=True)
+    drop_off = LocationSerializer(read_only=True)
 
     class Meta:
         model = Ride

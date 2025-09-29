@@ -137,15 +137,23 @@ class DriverListView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         user = self.request.user
+
         if user.is_driver:
             raise PermissionDenied("You are already a driver.")
 
         if not user.is_authenticated:
-                raise PermissionDenied("You must be logged in to create a driver profile.")
+            raise PermissionDenied("You must be logged in to create a driver profile.")
 
+        # Set the user's is_driver field to True
         user.is_driver = True
         user.save()
-        serializer.save(user=user)
+
+        # Set the driver's status to 'Documents Submitted'
+        driver_status = 'Documents Submitted'
+
+        # Save the driver instance with the user and status
+        serializer.save(user=user, status=driver_status)
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 

@@ -1,5 +1,3 @@
-from django.db.models import Model
-
 from rides.models import Ride, Location
 from rest_framework import serializers
 from apis.account_apis.serializers import UserSerializer, DriverSerializer

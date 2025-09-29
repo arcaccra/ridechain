@@ -92,11 +92,16 @@ class User(AbstractUser):
 class Driver(models.Model):
     """Model representing a driver."""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='driver', verbose_name=_('user'))
+    vehicle_image = models.ImageField(upload_to='accounts/drivers/vehicles/', blank=True, null=True, verbose_name=_('vehicle image'))
     vehicle_type = models.CharField(max_length=50, choices=VEHICLE_TYPES, verbose_name=_('vehicle type'), null=True)
     vehicle_color = models.CharField(max_length=50, choices=VEHICLE_COLORS, verbose_name=_('vehicle color'), null=True)
     vehicle_plate_number = models.CharField(max_length=20, unique=True, blank=True, null=True, verbose_name=_('vehicle plate number'))
+    licence_image = models.ImageField(upload_to='accounts/drivers/licenses/', blank=True, null=True, verbose_name=_('licence image'))
     id_type = models.CharField(max_length=50, choices=ID_TYPES, verbose_name=_('ID type'), null=True)
     id_number = models.CharField(max_length=50, unique=True, verbose_name=_('ID number'), null=True, blank=True)
+    id_front_image = models.ImageField(upload_to='accounts/drivers/ids/', blank=True, null=True, verbose_name=_('ID front image'))
+    id_back_image = models.ImageField(upload_to='accounts/drivers/ids/', blank=True, null=True, verbose_name=_('ID back image'))
+    insurance_cert = models.FileField(upload_to='accounts/drivers/insurance/', blank=True, null=True, verbose_name=_('insurance certificate'))
     date_created = models.DateTimeField(auto_now_add=True, verbose_name=_('date created'))
     date_updated = models.DateTimeField(auto_now=True, verbose_name=_('date updated'))
     approved = models.BooleanField(default=False, verbose_name=_('approved'))

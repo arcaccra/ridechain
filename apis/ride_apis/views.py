@@ -7,7 +7,7 @@ from rest_framework.exceptions import PermissionDenied
 from django.core.files.base import ContentFile
 from io import BytesIO
 from django.db.models import Q
-from .serializers import RideListSerializer, RideDetailSerializer, RideUpdateSerializer, LocationSerializer
+from .serializers import RideListSerializer, RideDetailSerializer, RideUpdateSerializer, LocationSerializer, RideCreateSerializer
 from rides.models import Ride, Location
 from apis.permissions import IsUserOrReadOnly, IsDriverOrReadOnly
 from ..views import EmptySerializer
@@ -42,7 +42,20 @@ class LocationListView(generics.ListCreateAPIView):
 
 
 class RideListView(generics.ListCreateAPIView):
+    """
+    Ride list and creation view.
+    For POST requests, provide:
+      - pick_up_id: Primary key of the pick up Location
+      - drop_off_id: Primary key of the drop off Location
+      - seats_available, price_per_seat, etc.
+    """
     serializer_class = RideListSerializer
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return RideCreateSerializer
+        return RideListSerializer
+
 
     def get_permissions(self):
         if self.request.method in ['POST']:

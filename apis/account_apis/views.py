@@ -6,8 +6,8 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate, login, logout
 from apis.permissions import IsUserOrReadOnly, IsDriverOrReadOnly
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from .serializers import UserSerializer, UserUpdateSerializer, LoginSerializer, LogoutSerializer, DriverSerializer
-from accounts.models import User, Driver
+from .serializers import UserSerializer, UserUpdateSerializer, LoginSerializer, LogoutSerializer, DriverSerializer, WalletSerializer
+from accounts.models import User, Driver, Wallet
 from ..views import EmptySerializer
 
 
@@ -211,6 +211,101 @@ class DriverUpdateView(generics.GenericAPIView):
             raise PermissionDenied("You do not have permission to delete this driver profile.")
 
 
+class WalletAPIVew(generics.GenericAPIView):
+    queryset = Wallet.objects.all()
+    serializer_class = WalletSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        """Admins see all wallets; regular users see only their own."""
+        user = self.request.user
+        if user.is_staff:
+            return Wallet.objects.all()
+        return Wallet.objects.filter(user=user)
+
+    def get_object(self):
+        """Return a specific wallet. If no pk is provided, default to the current user's wallet."""
+        pk = self.kwargs.get('pk')
+        if pk is not None:
+            try:
+                wallet = Wallet.objects.get(pk=pk)
+            except Wallet.DoesNotExist:
+                raise Http404("Wallet not found")
+        else:
+            try:
+                wallet = Wallet.objects.get(user=self.request.user)
+            except Wallet.DoesNotExist:
+                raise Http404("Wallet for current user not found")
+
+        # Permissions: only owner or admin can access a specific wallet
+        if not (self.request.user.is_staff or wallet.user == self.request.user):
+            raise PermissionDenied("You do not have permission to access this wallet.")
+        return wallet
+
+    def get(self, request, *args, **kwargs):
+        """List wallets (admin) or return current user's/specific wallet."""
+        if 'pk' in kwargs:
+            wallet = self.get_object()
+            serializer = self.get_serializer(wallet)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        # No pk: list if admin, else return single current user's wallet as an object
+        qs = self.get_queryset()
+        if request.user.is_staff:
+            serializer = self.get_serializer(qs, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        # Non-admin: return (or lazily create) the current user's wallet
+        try:
+            wallet = qs.get()
+        except Wallet.DoesNotExist:
+            return Response({"detail": "Wallet not found for current user."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = self.get_serializer(wallet)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        """Create a wallet for the current user. Admins may create for another user if `user` is provided."""
+        data = request.data.copy()
+        # Force ownership for non-admins
+        if not request.user.is_staff:
+            data['user'] = getattr(request.user, 'id', None)
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        # Prevent duplicates per user
+        user_id = serializer.validated_data.get('user').id if request.user.is_staff else request.user.id
+        if Wallet.objects.filter(user_id=user_id).exists():
+            raise ValidationError("A wallet already exists for this user.")
+
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def put(self, request, *args, **kwargs):
+        """Full update of a wallet (owner or admin)."""
+        wallet = self.get_object()
+        serializer = self.get_serializer(wallet, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        # Non-admins cannot reassign wallet ownership
+        if not request.user.is_staff and 'user' in serializer.validated_data:
+            serializer.validated_data.pop('user', None)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request, *args, **kwargs):
+        """Partial update of a wallet (owner or admin)."""
+        wallet = self.get_object()
+        serializer = self.get_serializer(wallet, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        if not request.user.is_staff and 'user' in serializer.validated_data:
+            serializer.validated_data.pop('user', None)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, *args, **kwargs):
+        """Delete a wallet (owner or admin)."""
+        wallet = self.get_object()
+        wallet.delete()
+        return Response({"message": "Wallet deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+
+
 class AccountRootView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = EmptySerializer
@@ -222,8 +317,6 @@ class AccountRootView(generics.GenericAPIView):
             'login': reverse_lazy('user-login', request=request, format=None),
             'logout': reverse_lazy('user-logout', request=request, format=None),
             'drivers': reverse_lazy('driver-list', request=request, format=None),
+            'wallets': reverse_lazy('wallet-list', request=request, format=None),
         }
         return Response(data)
-
-
-

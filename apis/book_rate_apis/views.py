@@ -20,7 +20,6 @@ class BookingListCreateView(generics.ListAPIView):
         return RideBooking.objects.none()
 
 
-
 class BookingDetailView(generics.RetrieveAPIView):
     serializer_class = RideBookingDetailSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -92,11 +91,6 @@ class RatingAPIView(generics.GenericAPIView):
             return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
-
-
-
-
-
 
 class BookingRootView(generics.GenericAPIView):
     serializer_class = EmptySerializer

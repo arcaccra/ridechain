@@ -117,6 +117,21 @@ class Driver(models.Model):
         return f"{self.user.full_name.split(' ')[0]} ({self.vehicle_plate_number})"
 
 
+class Wallet(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='wallet', verbose_name='User')
+    address = models.CharField(max_length=255, unique=True, verbose_name='Wallet Address')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Created At')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Last Updated')
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Wallet'
+        verbose_name_plural = 'Wallets'
+
+    def __str__(self):
+        return f"{self.user.full_name}'s Wallet: ({self.address})"
+
+
 class Subscriber(models.Model):
     email = models.EmailField(unique=False, verbose_name='Email Address')
     name = models.CharField(max_length=100, blank=True, null=True)

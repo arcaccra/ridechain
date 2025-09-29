@@ -1,6 +1,6 @@
 from django.contrib.auth import authenticate
 from rest_framework import serializers
-from accounts.models import User, Driver
+from accounts.models import User, Driver, Wallet
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -80,3 +80,19 @@ class DriverSerializer(serializers.ModelSerializer):
             'date_created', 'date_updated', 'status'
         )
 
+
+class DriverUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Driver
+        fields = (
+            'vehicle_image', 'vehicle_type', 'vehicle_color', 'vehicle_plate_number',
+            'licence_image', 'id_type', 'id_number', 'id_front_image', 'id_back_image', 'insurance_cert',
+            'status'
+        )
+
+class WalletSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Wallet
+        fields = ('id', 'user', 'address', 'created_at', 'updated_at')

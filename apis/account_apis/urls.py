@@ -9,6 +9,7 @@ from .views import (
     DriverListView,
     DriverDetailView,
     DriverUpdateView, AccountRootView,
+WalletAPIVew
 )
 
 urlpatterns = [
@@ -22,4 +23,5 @@ urlpatterns = [
     path('drivers/', DriverListView.as_view(), name='driver-list'),
     path('drivers/<int:pk>/', DriverDetailView.as_view(), name='driver-detail'),
     path('drivers/<int:pk>/update', DriverUpdateView.as_view(), name='driver-update'),
+    path('wallets/', WalletAPIVew.as_view(), name='wallet-list'),
 ]

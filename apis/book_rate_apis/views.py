@@ -1,8 +1,8 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
-from book_rate.models import RideBooking
-from .serializers import RideBookingSerializer, RideBookingDetailSerializer
+from book_rate.models import RideBooking, Rating
+from .serializers import RideBookingSerializer, RideBookingDetailSerializer, RatingSerializer
 from ..views import EmptySerializer
 from rest_framework.reverse import reverse_lazy
 
@@ -48,15 +48,64 @@ class BookingDetailView(generics.RetrieveAPIView):
         return Response(serializer.data)
 
 
+class RatingAPIView(generics.GenericAPIView):
+    serializer_class = RatingSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    queryset = Rating.objects.all()
+    pagination_class = None  # You can set a pagination class if needed
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        passenger = request.user
+        ride = serializer.validated_data['ride']
+
+        # Prevent duplicate ratings
+        if Rating.objects.filter(passenger=passenger, ride=ride).exists():
+            return Response({"detail": "You have already rated this ride."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create the rating instance
+        rating = Rating.objects.create(
+            passenger=passenger,
+            ride=ride,
+            score=serializer.validated_data['score'],
+            impression_option=serializer.validated_data.get('impression_option', ''),
+            comment=serializer.validated_data.get('comment', '')
+        )
+
+        return Response(self.get_serializer(rating).data, status=status.HTTP_201_CREATED)
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if user.is_superuser:
+            queryset = Rating.objects.all()
+        else:
+            queryset = Rating.objects.filter(passenger=user)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+
+
 
 
 class BookingRootView(generics.GenericAPIView):
     serializer_class = EmptySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
 
     @staticmethod
     def get(request, *args, **kwargs):
         data = {
-            'booking_list_create': reverse_lazy('booking-list-create', request=request, format=None),
+            'booking_list_create': reverse_lazy('booking-list', request=request, format=None),
+            'rating_list': reverse_lazy('rating-list', request=request, format=None),
         }
         return Response(data)

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from book_rate.models import RideBooking
+from book_rate.models import RideBooking, Rating
 from apis.account_apis.serializers import UserSerializer
 from apis.ride_apis.serializers import RideDetailSerializer
 from rides.models import Ride
@@ -54,3 +54,25 @@ class RideBookingDetailSerializer(serializers.ModelSerializer):
         # Create the booking instance
         booking = RideBooking.objects.create(passenger=passenger, ride=ride)
         return booking
+
+
+class RatingSerializer(serializers.ModelSerializer):
+    passenger = UserSerializer(read_only=True)
+    ride = serializers.PrimaryKeyRelatedField(queryset=Ride.objects.all())  # Accept ride ID in input
+
+    class Meta:
+        model = Rating
+        fields = [
+            'id',
+            'passenger',
+            'ride',
+            'score',
+            'impression_option',
+            'comment',
+            'date_rated',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = ['id', 'date_rated', 'created_at', 'updated_at']
+
+

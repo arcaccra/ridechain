@@ -49,3 +49,20 @@ DRIVER_STATUS_CHOICES = (
     ('Rejected', 'Rejected'),
     ('Under Review', 'Under Review'),
 )
+
+
+IMPRESSION_OPTIONS = (
+    ('', 'Select Impression'),
+    ('FRIENDLY', 'Friendly'),
+    ('PUNCTUAL', 'Punctual'),
+    ('SAFE_DRIVER', 'Safe Driver'),
+    ('CLEAN_VEHICLE', 'Clean Vehicle'),
+    ('GOOD_MUSIC', 'Good Music'),
+    ('HELPFUL', 'Helpful'),
+    ('RUSHED', 'Rushed'),
+    ('UNFRIENDLY', 'Unfriendly'),
+    ('DANGEROUS_DRIVER', 'Dangerous Driver'),
+    ('DIRTY_VEHICLE', 'Dirty Vehicle'),
+    ('BAD_MUSIC', 'Bad Music'),
+    ('UNHELPFUL', 'Unhelpful'),
+)

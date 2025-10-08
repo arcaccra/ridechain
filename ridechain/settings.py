@@ -164,14 +164,30 @@ REST_FRAMEWORK = {
 # CORS (Cross-Origin Resource Sharing) configuration
 CORS_ORIGIN_ALLOW_ALL = True  # Allow all origins (not recommended for production)
 CORS_ORIGIN_WHITELIST = [
+    "http://localhost:8000",  # Local development
     "http://127.0.0.1:8000",  # Local Django server
     "https://yaw959.pythonahywhere.com",  # Deployed frontend/backend
     "https://app.arcaccra.com",  # Production frontend
-    "http://127.0.0.1:3000",  # Local frontend (e.g., React)
+    "http://127.0.0.1:3000",
+    "http://localhost:3000",# Local frontend (e.g., React)
     "https://api.paystack.co",  # Paystack API
     "http://localhost:5173", # Local development server for frontend
 ]
 CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost",  # Local development
+    "http://127.0.0.1",  # Local Django server
+    "https://yaw959.pythonahywhere.com",  # Deployed frontend/backend
+    "https://app.arcaccra.com",  # Production frontend
+    "http://127.0.0.1:3000",  # Local frontend (e.g., React)
+    "https://api.paystack.co",  # Paystack API
+    "http://localhost:5173",
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/

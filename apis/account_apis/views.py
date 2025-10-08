@@ -161,14 +161,14 @@ class DriverListView(generics.ListCreateAPIView):
 class DriverDetailView(generics.RetrieveAPIView):
     queryset = Driver.objects.all()
     serializer_class = DriverSerializer
-    permission_classes = [permissions.IsAuthenticated, IsUserOrReadOnly | permissions.IsAdminUser]
+    permission_classes = [permissions.IsAuthenticated, IsDriverOrReadOnly | permissions.IsAdminUser]
 
 
 # Driver Update View
 class DriverUpdateView(generics.GenericAPIView):
     queryset = Driver.objects.all()
     serializer_class = DriverSerializer
-    permission_classes = [permissions.IsAuthenticated, IsUserOrReadOnly | permissions.IsAdminUser]
+    permission_classes = [permissions.IsAuthenticated, IsDriverOrReadOnly | permissions.IsAdminUser]
 
     def get_object(self):
         pk = self.kwargs.get('pk')

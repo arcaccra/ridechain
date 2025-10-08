@@ -132,27 +132,44 @@ class RideDetailView(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated, IsUserOrReadOnly | permissions.IsAdminUser]
 
 
-class RideUpdateView(generics.UpdateAPIView):
+class RideUpdateView(generics.GenericAPIView):
     serializer_class = RideUpdateSerializer
     queryset = Ride.objects.all()
-    permission_classes = [IsDriverOrReadOnly | permissions.IsAdminUser]
-    def get_object(self):
-        return Ride.objects.get(uuid=self.kwargs.get('pk'))
+    permission_classes = [permissions.IsAuthenticated]
 
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data)
+    def get_object(self):
+        uuid = self.kwargs.get('pk')
+        try:
+            ride = Ride.objects.get(uuid=uuid)
+        except Ride.DoesNotExist:
+            raise serializers.ValidationError("Ride does not exist.")
+        if self.request.user != ride.driver.user and not self.request.user.is_staff:
+            raise PermissionDenied("You do not have permission to update this ride.")
+        return ride
+
+    def get (self, request, *args, **kwargs):
+        ride = self.get_object()
+        serializer = self.get_serializer(ride)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, *args, **kwargs):
+        ride = self.get_object()
+        serializer = self.get_serializer(ride, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
+        serializer.save()
         return Response({'success': 'Ride Updated Successfully', **serializer.data}, status=status.HTTP_200_OK)
 
-    def perform_update(self, serializer):
+    def patch(self, request, *args, **kwargs):
+        ride = self.get_object()
+        serializer = self.get_serializer(ride, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
         serializer.save()
+        return Response({'success': 'Ride Updated Successfully', **serializer.data}, status=status.HTTP_200_OK)
 
-    def get(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def delete(self, request, *args, **kwargs):
+        ride = self.get_object()
+        ride.delete()
+        return Response({'success': 'Ride Deleted Successfully'}, status=status.HTTP_200_OK)
 
 
 class RideBookingValidationMixin:

@@ -138,39 +138,41 @@ class RideUpdateView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
-        uuid = self.kwargs.get('pk')
+        pk = self.kwargs.get('pk')
         try:
-            ride = Ride.objects.get(uuid=uuid)
+            ride = Ride.objects.get(pk=pk)
+            self.check_object_permissions(self.request, ride)
+            return ride
         except Ride.DoesNotExist:
-            raise serializers.ValidationError("Ride does not exist.")
-        if self.request.user != ride.driver.user and not self.request.user.is_staff:
-            raise PermissionDenied("You do not have permission to update this ride.")
-        return ride
+            from django.http import Http404
+            raise Http404("Driver not found")
 
-    def get (self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         ride = self.get_object()
         serializer = self.get_serializer(ride)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, *args, **kwargs):
         ride = self.get_object()
-        serializer = self.get_serializer(ride, data=request.data, partial=True)
+        serializer = self.get_serializer(ride, data=request.data, partial=False)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response({'success': 'Ride Updated Successfully', **serializer.data}, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def patch(self, request, *args, **kwargs):
         ride = self.get_object()
         serializer = self.get_serializer(ride, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response({'success': 'Ride Updated Successfully', **serializer.data}, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request, *args, **kwargs):
         ride = self.get_object()
-        ride.delete()
-        return Response({'success': 'Ride Deleted Successfully'}, status=status.HTTP_200_OK)
-
+        if ride.driver.user == request.user or request.user.is_staff:
+            ride.delete()
+            return Response({"message": "Driver profile deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+        else:
+            raise PermissionDenied("You do not have permission to delete this driver profile.")
 
 class RideBookingValidationMixin:
 

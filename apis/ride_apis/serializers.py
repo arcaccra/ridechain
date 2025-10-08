@@ -42,6 +42,7 @@ class RideCreateSerializer(serializers.ModelSerializer):
             'drop_off',
             'seats_available',
             'price_per_seat',
+            'departure_time',
             'created_at',
             'updated_at'
         ]
@@ -52,8 +53,8 @@ class RideCreateSerializer(serializers.ModelSerializer):
 class RideDetailSerializer(serializers.ModelSerializer):
     driver = DriverSerializer(read_only=True)
     passengers = UserSerializer(many=True, read_only=True)
-    pick_up = LocationSerializer(read_only=True)
-    drop_off = LocationSerializer(read_only=True)
+    pick_up = LocationSerializer()
+    drop_off = LocationSerializer()
 
     class Meta:
         model = Ride
@@ -78,14 +79,12 @@ class RideUpdateSerializer(serializers.ModelSerializer):
     pick_up = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all(), required=False)
     drop_off = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all(), required=False)
     driver = DriverSerializer(read_only=True)
-    passengers = UserSerializer(many=True)
 
     class Meta:
         model = Ride
         fields = [
             'uuid',
             'driver',
-            'passengers',
             'pick_up',
             'drop_off',
             'seats_available',

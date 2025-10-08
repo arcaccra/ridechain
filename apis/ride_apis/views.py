@@ -38,15 +38,12 @@ class LocationListView(generics.ListCreateAPIView):
         return Response({'success': 'Location Created Successfully', **response.data}, status=status.HTTP_201_CREATED)
 
 
-
-
-
 class RideListView(generics.ListCreateAPIView):
     """
     Ride list and creation view.
     For POST requests, provide:
-      - pick_up_id: Primary key of the pick up Location
-      - drop_off_id: Primary key of the drop off Location
+      - pick_up_id: Primary key of the pick_up Location
+      - drop_off_id: Primary key of the drop_off Location
       - seats_available, price_per_seat, etc.
     """
     serializer_class = RideListSerializer
@@ -135,44 +132,27 @@ class RideDetailView(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated, IsUserOrReadOnly | permissions.IsAdminUser]
 
 
-class RideUpdateView(generics.GenericAPIView):
+class RideUpdateView(generics.UpdateAPIView):
     serializer_class = RideUpdateSerializer
     queryset = Ride.objects.all()
-    permission_classes = [permissions.IsAuthenticated, IsDriverOrReadOnly | permissions.IsAdminUser]
-
-    @staticmethod
-    def check_driver_permission(instance, user):
-        # Ensure the user is the driver of the ride
-        if instance.driver != user.driver:
-            raise PermissionDenied("You can only update your own rides.")
-
-    def get (self, request, *args, **kwargs):
-        instance = self.get_object()
-        self.check_driver_permission(instance, request.user)
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
-
-
-    def put(self, request, *args, **kwargs):
-        self.update(request, *args, **kwargs)
-
-    def patch(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs, partial=True)
+    permission_classes = [IsDriverOrReadOnly | permissions.IsAdminUser]
+    def get_object(self):
+        return Ride.objects.get(uuid=self.kwargs.get('pk'))
 
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', True)
         instance = self.get_object()
-        self.check_driver_permission(instance, request.user)
-
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response({'success': 'Ride Updated Successfully', **serializer.data}, status=status.HTTP_200_OK)
 
     def perform_update(self, serializer):
-        instance = serializer.instance
+        serializer.save()
+
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
         serializer = self.get_serializer(instance)
-        return Response (serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class RideBookingValidationMixin:

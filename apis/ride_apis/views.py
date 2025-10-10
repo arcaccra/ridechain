@@ -1,5 +1,6 @@
 from django.urls import reverse
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics, permissions, status, serializers
 from rest_framework.response import Response
 from rest_framework.reverse import reverse_lazy
@@ -137,21 +138,11 @@ class RideUpdateView(generics.GenericAPIView):
     queryset = Ride.objects.all()
     permission_classes = [permissions.IsAuthenticated]
 
-    def get_object(self):
-        pk = self.kwargs.get('pk')
-        try:
-            ride = Ride.objects.get(pk=pk)
-            self.check_object_permissions(self.request, ride)
-            return ride
-        except Ride.DoesNotExist:
-            from django.http import Http404
-            raise Http404("Driver not found")
-
     def get(self, request, *args, **kwargs):
         ride = self.get_object()
         serializer = self.get_serializer(ride)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
+    
     def put(self, request, *args, **kwargs):
         ride = self.get_object()
         serializer = self.get_serializer(ride, data=request.data, partial=False)
@@ -168,11 +159,8 @@ class RideUpdateView(generics.GenericAPIView):
 
     def delete(self, request, *args, **kwargs):
         ride = self.get_object()
-        if ride.driver.user == request.user or request.user.is_staff:
-            ride.delete()
-            return Response({"message": "Driver profile deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
-        else:
-            raise PermissionDenied("You do not have permission to delete this driver profile.")
+        ride.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class RideBookingValidationMixin:
 

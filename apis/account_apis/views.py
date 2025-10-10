@@ -1,3 +1,5 @@
+from functools import partial
+
 from django.http import Http404
 from rest_framework.reverse import reverse_lazy
 from rest_framework import generics, permissions, status
@@ -190,13 +192,31 @@ class DriverUpdateView(generics.GenericAPIView):
 
     def put(self, request, *args, **kwargs):
         driver = self.get_object()
-        serializer = self.get_serializer(driver, data=request.data, partial=False)
+        file_fields = ['license_document', 'vehicle_registration', 'insurance_document', 'profile_picture']
+        for field in file_fields:
+            if field in request.FILES:
+                request.data[field] = request.FILES[field]
+            else:
+                # Preserve existing file if not provided in the update
+                existing_file = getattr(driver, field)
+                if existing_file:
+                    request.data[field] = existing_file
+        serializer = self.get_serializer(driver, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def patch(self, request, *args, **kwargs):
         driver = self.get_object()
+        file_fields = ['license_document', 'vehicle_registration', 'insurance_document', 'profile_picture']
+        for field in file_fields:
+            if field in request.FILES:
+                request.data[field] = request.FILES[field]
+            else:
+                # Preserve existing file if not provided in the update
+                existing_file = getattr(driver, field)
+                if existing_file:
+                    request.data[field] = existing_file
         serializer = self.get_serializer(driver, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()

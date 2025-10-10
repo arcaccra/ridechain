@@ -90,7 +90,6 @@ class RideUpdateSerializer(serializers.ModelSerializer):
             'seats_available',
             'price_per_seat',
             'departure_time',
-            'arrival_time',
             'status',
             'created_at',
             'updated_at'

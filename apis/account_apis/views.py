@@ -192,7 +192,7 @@ class DriverUpdateView(generics.GenericAPIView):
 
     def put(self, request, *args, **kwargs):
         driver = self.get_object()
-        file_fields = ['license_document', 'vehicle_registration', 'insurance_document', 'profile_picture']
+        file_fields = ['vehicle_image', 'licence_image', 'id_front_image', 'id_back_image', 'insurance_cert']
         for field in file_fields:
             if field in request.FILES:
                 request.data[field] = request.FILES[field]
@@ -208,7 +208,7 @@ class DriverUpdateView(generics.GenericAPIView):
 
     def patch(self, request, *args, **kwargs):
         driver = self.get_object()
-        file_fields = ['license_document', 'vehicle_registration', 'insurance_document', 'profile_picture']
+        file_fields = ['vehicle_image', 'licence_image', 'id_front_image', 'id_back_image', 'insurance_cert']
         for field in file_fields:
             if field in request.FILES:
                 request.data[field] = request.FILES[field]

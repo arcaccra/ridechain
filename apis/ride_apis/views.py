@@ -38,7 +38,6 @@ class LocationListView(generics.ListCreateAPIView):
         response = super().post(request, *args, **kwargs)
         return Response({'success': 'Location Created Successfully', **response.data}, status=status.HTTP_201_CREATED)
 
-
 class RideListView(generics.ListCreateAPIView):
     """
     Ride list and creation view.
@@ -85,7 +84,6 @@ class RideListView(generics.ListCreateAPIView):
         response = super().post(request, *args, **kwargs)
         return Response({'success': 'Ride Created Successfully', **response.data}, status=status.HTTP_201_CREATED)
 
-
 class RideSearchView(generics.ListAPIView):
     """
     Mobile-friendly ride search by location names.
@@ -126,12 +124,10 @@ class RideSearchView(generics.ListAPIView):
         response = super().get(request, *args, **kwargs)
         return Response(response.data, status=status.HTTP_200_OK)
 
-
 class RideDetailView(generics.RetrieveAPIView):
     serializer_class = RideDetailSerializer
     queryset = Ride.objects.all()
     permission_classes = [permissions.IsAuthenticated, IsUserOrReadOnly | permissions.IsAdminUser]
-
 
 class RideUpdateView(generics.GenericAPIView):
     serializer_class = RideUpdateSerializer

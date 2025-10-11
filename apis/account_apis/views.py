@@ -89,8 +89,8 @@ class UserDetailView(generics.RetrieveAPIView):
 
         # Add the event manager id to the response if the user is an event manager
         if user.is_driver:
-            driver_serializer = DriverSerializer(user.driver, exclude_fields=['user'])
-            response.data['driver'] = driver_serializer.data
+            driver_serializer = DriverSerializer(user.driver)
+            response.data['driver'] = driver_serializer.data[1:]
 
         return response
 

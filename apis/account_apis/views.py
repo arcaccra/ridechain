@@ -141,10 +141,16 @@ class DriverListView(generics.ListCreateAPIView):
         user = self.request.user
 
         if user.is_driver:
-            raise PermissionDenied("You are already a driver.")
+            raise PermissionDenied({
+                "error": "You are already a driver.",
+                "message": "You cannot create a driver profile if you are already a driver."
+            })
 
         if not user.is_authenticated:
-            raise PermissionDenied("You must be logged in to create a driver profile.")
+            raise PermissionDenied({
+                "error": "You must be logged in to create a driver profile.",
+                "message": "You are not logged in."
+            })
 
         # Set the user's is_driver field to True
         user.is_driver = True
@@ -156,7 +162,16 @@ class DriverListView(generics.ListCreateAPIView):
         # Save the driver instance with the user and status
         serializer.save(user=user, status=driver_status)
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # Allow file fields operations
+        for field in ['vehicle_image', 'licence_image', 'id_front_image', 'id_back_image', 'insurance_cert']:
+            if field in self.request.FILES:
+                setattr(serializer.instance, field, self.request.FILES[field])
+
+        return Response({
+            "success": "Driver profile created successfully.",
+            "message": "You have successfully created a driver profile.",
+            "data": serializer.data
+        }, status=status.HTTP_201_CREATED)
 
 
 # Driver Detail View

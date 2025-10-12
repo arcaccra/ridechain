@@ -51,6 +51,7 @@ class LoginView(generics.GenericAPIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [AllowAny]
 
+    @staticmethod
     def post(self, request):
         user = authenticate(request, username=request.data.get('email'), password=request.data.get('password'))
         if user is not None:
@@ -74,6 +75,7 @@ class LogoutView(generics.GenericAPIView):
     def get(request, *args, **kwargs):
         try:
             logout(request)
+            request.session.clear()  # Clear the session
             msg = {'message': 'You have logged out now'}
             return Response(msg, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:

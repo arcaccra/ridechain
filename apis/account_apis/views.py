@@ -11,6 +11,8 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from .serializers import UserSerializer, UserUpdateSerializer, LoginSerializer, LogoutSerializer, DriverSerializer, WalletSerializer
 from accounts.models import User, Driver, Wallet
 from ..views import EmptySerializer
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.permissions import AllowAny
 
 
 # User List
@@ -43,8 +45,11 @@ class RegisterView(generics.CreateAPIView):
 
 
 # Login View
+
 class LoginView(generics.GenericAPIView):
     serializer_class = LoginSerializer
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [AllowAny]
 
     def post(self, request):
         user = authenticate(request, username=request.data.get('email'), password=request.data.get('password'))

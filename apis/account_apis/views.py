@@ -51,7 +51,6 @@ class LoginView(generics.GenericAPIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [AllowAny]
 
-    @staticmethod
     def post(self, request):
         user = authenticate(request, username=request.data.get('email'), password=request.data.get('password'))
         if user is not None:
@@ -70,6 +69,7 @@ class LoginView(generics.GenericAPIView):
 # Logout View
 class LogoutView(generics.GenericAPIView):
     serializer_class = LogoutSerializer
+    permissions_classes = [permissions.IsAuthenticated]
 
     @staticmethod
     def get(request, *args, **kwargs):

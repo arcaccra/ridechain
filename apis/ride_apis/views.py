@@ -64,6 +64,10 @@ class RideListView(generics.ListCreateAPIView):
         if user.is_authenticated:
             if user.is_driver:
                 return Ride.objects.filter(driver=user.driver)
+            elif user.is_driver and user.is_staff:
+                return Ride.objects.all()
+            elif user.is_superuser:
+                return Ride.objects.all()
             else:
                 return Ride.objects.all()
         return Ride.objects.none()

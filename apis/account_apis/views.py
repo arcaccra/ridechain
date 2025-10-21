@@ -15,6 +15,21 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import AllowAny
 
 
+# Reusable file handling for Driver file fields
+DRIVER_FILE_FIELDS = [
+    'vehicle_image', 'licence_image', 'id_front_image', 'id_back_image', 'insurance_cert'
+]
+
+
+def get_driver_file_updates(request):
+    """Return a dict of file field updates present in request.FILES for Driver instances."""
+    updates = {}
+    for field in DRIVER_FILE_FIELDS:
+        if field in request.FILES:
+            updates[field] = request.FILES[field]
+    return updates
+
+
 # User List
 class UserListView(generics.ListAPIView):
     queryset = User.objects.all()
@@ -172,10 +187,13 @@ class DriverListView(generics.ListCreateAPIView):
         # Save the driver instance with the user and status
         serializer.save(user=user, status=driver_status)
 
-        # Allow file fields operations
-        for field in ['vehicle_image', 'licence_image', 'id_front_image', 'id_back_image', 'insurance_cert']:
-            if field in self.request.FILES:
-                setattr(serializer.instance, field, self.request.FILES[field])
+        # Apply any uploaded file fields and persist
+        file_updates = get_driver_file_updates(self.request)
+        if file_updates:
+            for field, value in file_updates.items():
+                setattr(serializer.instance, field, value)
+            # Persist only the updated file fields to avoid unintended changes
+            serializer.instance.save(update_fields=list(file_updates.keys()))
 
         return Response({
             "success": "Driver profile created successfully.",
@@ -217,32 +235,20 @@ class DriverUpdateView(generics.GenericAPIView):
 
     def put(self, request, *args, **kwargs):
         driver = self.get_object()
-        file_fields = ['vehicle_image', 'licence_image', 'id_front_image', 'id_back_image', 'insurance_cert']
-        for field in file_fields:
-            if field in request.FILES:
-                request.data[field] = request.FILES[field]
-            else:
-                # Preserve existing file if not provided in the update
-                existing_file = getattr(driver, field)
-                if existing_file:
-                    request.data[field] = existing_file
-        serializer = self.get_serializer(driver, data=request.data, partial=True)
+        data = request.data.copy()
+        # Merge only provided file updates; partial=True preserves others
+        data.update(get_driver_file_updates(request))
+        serializer = self.get_serializer(driver, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def patch(self, request, *args, **kwargs):
         driver = self.get_object()
-        file_fields = ['vehicle_image', 'licence_image', 'id_front_image', 'id_back_image', 'insurance_cert']
-        for field in file_fields:
-            if field in request.FILES:
-                request.data[field] = request.FILES[field]
-            else:
-                # Preserve existing file if not provided in the update
-                existing_file = getattr(driver, field)
-                if existing_file:
-                    request.data[field] = existing_file
-        serializer = self.get_serializer(driver, data=request.data, partial=True)
+        data = request.data.copy()
+        # Merge only provided file updates; partial=True preserves others
+        data.update(get_driver_file_updates(request))
+        serializer = self.get_serializer(driver, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)

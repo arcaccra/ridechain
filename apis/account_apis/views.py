@@ -1,5 +1,3 @@
-from functools import partial
-
 from django.http import Http404
 from rest_framework.reverse import reverse_lazy
 from rest_framework import generics, permissions, status
@@ -304,7 +302,7 @@ class WalletAPIVew(generics.GenericAPIView):
         if request.user.is_staff:
             serializer = self.get_serializer(qs, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        # Non-admin: return (or lazily create) the current user's wallet
+        # Non-admin: return the current user's wallet or 404
         try:
             wallet = qs.get()
         except Wallet.DoesNotExist:
@@ -315,38 +313,62 @@ class WalletAPIVew(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         """Create a wallet for the current user. Admins may create for another user if `user` is provided."""
         data = request.data.copy()
-        # Force ownership for non-admins
+        # For non-admins, ownership is always the requesting user
         if not request.user.is_staff:
-            data['user'] = getattr(request.user, 'id', None)
+            owner = request.user
+        else:
+            owner = None
+
+        # Validate address presence
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
 
+        # Determine target user id for duplicate check and creation
+        if owner is not None:
+            user_id = owner.id
+        else:
+            # Admin must provide a `user` id in the request data to create a wallet for someone else
+            user_id = data.get('user') or None
+            if user_id is None:
+                raise ValidationError("Admin must provide a `user` id when creating a wallet for another user.")
+
         # Prevent duplicates per user
-        user_id = serializer.validated_data.get('user').id if request.user.is_staff else request.user.id
         if Wallet.objects.filter(user_id=user_id).exists():
             raise ValidationError("A wallet already exists for this user.")
 
-        serializer.save()
+        # Create with the correct user instance
+        if owner is not None:
+            serializer.save(user=owner)
+        else:
+            from accounts.models import User as AccountUser
+            try:
+                target_user = AccountUser.objects.get(pk=user_id)
+            except AccountUser.DoesNotExist:
+                raise ValidationError("Provided user id does not exist.")
+            serializer.save(user=target_user)
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def put(self, request, *args, **kwargs):
         """Full update of a wallet (owner or admin)."""
         wallet = self.get_object()
-        serializer = self.get_serializer(wallet, data=request.data)
+        # Non-admins cannot reassign wallet ownership; enforce owner stays the same
+        data = request.data.copy()
+        if not request.user.is_staff:
+            data.pop('user', None)
+        serializer = self.get_serializer(wallet, data=data)
         serializer.is_valid(raise_exception=True)
-        # Non-admins cannot reassign wallet ownership
-        if not request.user.is_staff and 'user' in serializer.validated_data:
-            serializer.validated_data.pop('user', None)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def patch(self, request, *args, **kwargs):
         """Partial update of a wallet (owner or admin)."""
         wallet = self.get_object()
-        serializer = self.get_serializer(wallet, data=request.data, partial=True)
+        data = request.data.copy()
+        if not request.user.is_staff:
+            data.pop('user', None)
+        serializer = self.get_serializer(wallet, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
-        if not request.user.is_staff and 'user' in serializer.validated_data:
-            serializer.validated_data.pop('user', None)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 

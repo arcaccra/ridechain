@@ -24,4 +24,5 @@ urlpatterns = [
     path('drivers/<int:pk>/', DriverDetailView.as_view(), name='driver-detail'),
     path('drivers/<int:pk>/update', DriverUpdateView.as_view(), name='driver-update'),
     path('wallets/', WalletAPIVew.as_view(), name='wallet-list'),
+    path('wallets/<int:pk>/', WalletAPIVew.as_view(), name='wallet-detail'),
 ]

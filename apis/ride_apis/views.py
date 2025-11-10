@@ -52,8 +52,6 @@ class RideListView(generics.ListCreateAPIView):
     serializer_class = RideListSerializer
 
     def get_serializer_class(self):
-        if self.request.method == 'POST':
-            return RideCreateSerializer
         return RideListSerializer
 
 

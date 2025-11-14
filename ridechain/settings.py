@@ -45,7 +45,8 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'yaw959.pythonahywhere.com',
     'api.paystack.co',
-    'app.arcaccra.com'
+    'app.arcaccra.com',
+    'cardano-preprod.blockfrost.io'
 ]
 
 templates = os.path.join(BASE_DIR, 'templates')
@@ -171,6 +172,7 @@ CORS_ORIGIN_WHITELIST = [
     "https://app.arcaccra.com",  # Production frontend
     "https://api.paystack.co",  # Paystack API
     "http://localhost:5173", # Local development server for frontend
+    "https://cardano-preprod.blockfrost.io", # Blockfrost API
 ]
 CORS_ALLOW_CREDENTIALS = True
 
@@ -184,6 +186,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:3000",  # Local frontend (e.g., React)
     "https://api.paystack.co",  # Paystack API
     "http://localhost:5173",
+    "https://cardano-preprod.blockfrost.io",
 ]
 
 
@@ -227,3 +230,7 @@ DEFAULT_FROM_EMAIL = 'RideChain <' + EMAIL_HOST_USER + '>'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# BlockFrost API Key
+BLOCKFROST_API_KEY = env('BLOCKFROST_API_KEY')

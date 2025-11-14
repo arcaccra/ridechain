@@ -11,12 +11,11 @@ from accounts.models import User, Driver, Wallet
 from ..views import EmptySerializer
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import AllowAny
-
 import requests
 from decimal import Decimal, InvalidOperation
 import logging
-
 logger = logging.getLogger(__name__)
+from utilities.blockfrost_config import BlockfrostConfig
 
 # Reusable file handling for Driver file fields
 DRIVER_FILE_FIELDS = [
@@ -298,25 +297,43 @@ class WalletAPIVew(generics.GenericAPIView):
         return wallet
 
     def get(self, request, *args, **kwargs):
-        """List wallets (admin) or return current user's/specific wallet."""
+        """List wallets (admin) or return current user's/specific wallet, including balance for single-wallet responses."""
         if 'pk' in kwargs:
             wallet = self.get_object()
             serializer = self.get_serializer(wallet)
             data = serializer.data
+            address = data.get('address') or getattr(wallet, 'address', None)
+            if address:
+                try:
+                    bf = BlockfrostConfig()
+                    data['balance'] = bf.get_wallet_balance(address)
+                except Exception as e:
+                    logger.exception("Failed to fetch balance for wallet %s: %s", address, e)
+                    data['balance_error'] = "Unable to fetch balance at this time."
             return Response(data, status=status.HTTP_200_OK)
-        # No pk: list if admin, else return single current user's wallet as an object
+
         qs = self.get_queryset()
         if request.user.is_staff:
             serializer = self.get_serializer(qs, many=True)
             data = serializer.data
             return Response(data, status=status.HTTP_200_OK)
+
         # Non-admin: return the current user's wallet or 404
         try:
             wallet = qs.get()
         except Wallet.DoesNotExist:
             return Response({"detail": "Wallet not found for current user."}, status=status.HTTP_404_NOT_FOUND)
+
         serializer = self.get_serializer(wallet)
         data = serializer.data
+        address = data.get('address') or getattr(wallet, 'address', None)
+        if address:
+            try:
+                bf = BlockfrostConfig()
+                data['balance'] = bf.get_wallet_balance(address)
+            except Exception as e:
+                logger.exception("Failed to fetch balance for wallet %s: %s", address, e)
+                data['balance_error'] = "Unable to fetch balance at this time."
         return Response(data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):

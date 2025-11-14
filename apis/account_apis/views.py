@@ -11,7 +11,48 @@ from accounts.models import User, Driver, Wallet
 from ..views import EmptySerializer
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import AllowAny
+from ridechain.settings import BLOCKFROST_API_KEY
 
+import requests
+from decimal import Decimal, InvalidOperation
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def _get_blockfrost_balance_ada(address: str) -> str | None:
+    """Return ADA balance as a string (e.g. '1.234') for the given address via Blockfrost, or None on error.
+
+    This is intentionally simple: it returns None if the key is missing, request fails, or parsing fails.
+    """
+    if not BLOCKFROST_API_KEY:
+        logger.debug("BLOCKFROST_API_KEY not configured; skipping balance fetch")
+        return None
+
+    url = f"https://cardano-preview.blockfrost.io/api/v0/addresses/{address}"
+    headers = {"project_id": "previewF7d13FkDumA4ty5gTS304let6k8jH0c7"}
+    try:
+        resp = requests.get(url, headers=headers, timeout=8)
+        if resp.status_code != 200:
+            logger.warning("Blockfrost returned %s for address %s", resp.status_code, address)
+            return None
+        data = resp.json()
+        amount = data.get("amount", [])
+        for item in amount:
+            if item.get("unit") == "lovelace":
+                qty = item.get("quantity", "0")
+                try:
+                    ada = Decimal(qty) / Decimal(1_000_000)
+                    # Normalize to string without scientific notation
+                    return format(ada.normalize(), 'f')
+                except (InvalidOperation, TypeError):
+                    logger.exception("Failed converting lovelace to ADA for %s", address)
+                    return None
+    except Exception:
+        logger.exception("Blockfrost request failed for address %s", address)
+        return None
+
+    return None
 
 # Reusable file handling for Driver file fields
 DRIVER_FILE_FIELDS = [
@@ -42,19 +83,20 @@ class RegisterView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        if user:
-            token, created = Token.objects.get_or_create(user=user)
-            user_serializer = self.get_serializer(user)
-            headers = self.get_success_headers(serializer.data)
-            data = {
-                'message': 'Registration successful.',
-                'token': token.key,
-                'user': user_serializer.data
-            }
-            return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        avatar_file = request.FILES.get('avatar')
+        save_kwargs = {'avatar': avatar_file} if avatar_file else {}
+        user = serializer.save(**save_kwargs)
+
+        token, _ = Token.objects.get_or_create(user=user)
+        user_serializer = self.get_serializer(user, context={'request': request})
+        headers = self.get_success_headers(serializer.data)
+        data = {
+            'message': 'Registration successful.',
+            'token': token.key,
+            'user': user_serializer.data,
+        }
+        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 # Login View
@@ -296,57 +338,53 @@ class WalletAPIVew(generics.GenericAPIView):
         if 'pk' in kwargs:
             wallet = self.get_object()
             serializer = self.get_serializer(wallet)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            data = serializer.data
+            # Fetch balance from Blockfrost (simplified)
+            data['balance'] = _get_blockfrost_balance_ada(wallet.address)
+            return Response(data, status=status.HTTP_200_OK)
         # No pk: list if admin, else return single current user's wallet as an object
         qs = self.get_queryset()
         if request.user.is_staff:
             serializer = self.get_serializer(qs, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            # Attach Blockfrost balance for each wallet (best-effort; may be slow for many wallets)
+            data = [
+                {**item, 'balance': _get_blockfrost_balance_ada(obj.address)}
+                for item, obj in zip(serializer.data, qs)
+            ]
+            return Response(data, status=status.HTTP_200_OK)
         # Non-admin: return the current user's wallet or 404
         try:
             wallet = qs.get()
         except Wallet.DoesNotExist:
             return Response({"detail": "Wallet not found for current user."}, status=status.HTTP_404_NOT_FOUND)
         serializer = self.get_serializer(wallet)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        data = serializer.data
+        # Fetch balance from Blockfrost (simplified)
+        data['balance'] = _get_blockfrost_balance_ada(wallet.address)
+        return Response(data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
-        """Create a wallet for the current user. Admins may create for another user if `user` is provided."""
-        data = request.data.copy()
-        # For non-admins, ownership is always the requesting user
-        if not request.user.is_staff:
-            owner = request.user
-        else:
-            owner = None
+        """Create a wallet for the authenticated user.
 
-        # Validate address presence
+        Simplified behavior:
+        - Only the requesting user can create their wallet.
+        - Validates required `address` and that the user doesn't already have a wallet.
+        - Saves the wallet with user=request.user.
+        """
+        data = request.data.copy()
+
+        # Require an address
+        address = data.get('address')
+        if not address:
+            raise ValidationError({'address': 'This field is required.'})
+
+        # Check if the address is already in use
+        if Wallet.objects.filter(address=address).exists():
+            raise ValidationError({'address': 'A wallet with this address already exists.'})
+
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
-
-        # Determine target user id for duplicate check and creation
-        if owner is not None:
-            user_id = owner.id
-        else:
-            # Admin must provide a `user` id in the request data to create a wallet for someone else
-            user_id = data.get('user') or None
-            if user_id is None:
-                raise ValidationError("Admin must provide a `user` id when creating a wallet for another user.")
-
-        # Prevent duplicates per user
-        if Wallet.objects.filter(user_id=user_id).exists():
-            raise ValidationError("A wallet already exists for this user.")
-
-        # Create with the correct user instance
-        if owner is not None:
-            serializer.save(user=owner)
-        else:
-            from accounts.models import User as AccountUser
-            try:
-                target_user = AccountUser.objects.get(pk=user_id)
-            except AccountUser.DoesNotExist:
-                raise ValidationError("Provided user id does not exist.")
-            serializer.save(user=target_user)
-
+        serializer.save(user=request.user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def put(self, request, *args, **kwargs):

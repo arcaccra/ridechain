@@ -20,3 +20,8 @@ media/
 
 FEATURE_LIST.md
 
+.vscode/
+
+# Logs
+*.log
+logs/

@@ -11,48 +11,12 @@ from accounts.models import User, Driver, Wallet
 from ..views import EmptySerializer
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import AllowAny
-from ridechain.settings import BLOCKFROST_API_KEY
 
 import requests
 from decimal import Decimal, InvalidOperation
 import logging
 
 logger = logging.getLogger(__name__)
-
-
-def _get_blockfrost_balance_ada(address: str) -> str | None:
-    """Return ADA balance as a string (e.g. '1.234') for the given address via Blockfrost, or None on error.
-
-    This is intentionally simple: it returns None if the key is missing, request fails, or parsing fails.
-    """
-    if not BLOCKFROST_API_KEY:
-        logger.debug("BLOCKFROST_API_KEY not configured; skipping balance fetch")
-        return None
-
-    url = f"https://cardano-preview.blockfrost.io/api/v0/addresses/{address}"
-    headers = {"project_id": "previewF7d13FkDumA4ty5gTS304let6k8jH0c7"}
-    try:
-        resp = requests.get(url, headers=headers, timeout=8)
-        if resp.status_code != 200:
-            logger.warning("Blockfrost returned %s for address %s", resp.status_code, address)
-            return None
-        data = resp.json()
-        amount = data.get("amount", [])
-        for item in amount:
-            if item.get("unit") == "lovelace":
-                qty = item.get("quantity", "0")
-                try:
-                    ada = Decimal(qty) / Decimal(1_000_000)
-                    # Normalize to string without scientific notation
-                    return format(ada.normalize(), 'f')
-                except (InvalidOperation, TypeError):
-                    logger.exception("Failed converting lovelace to ADA for %s", address)
-                    return None
-    except Exception:
-        logger.exception("Blockfrost request failed for address %s", address)
-        return None
-
-    return None
 
 # Reusable file handling for Driver file fields
 DRIVER_FILE_FIELDS = [
@@ -339,18 +303,12 @@ class WalletAPIVew(generics.GenericAPIView):
             wallet = self.get_object()
             serializer = self.get_serializer(wallet)
             data = serializer.data
-            # Fetch balance from Blockfrost (simplified)
-            data['balance'] = _get_blockfrost_balance_ada(wallet.address)
             return Response(data, status=status.HTTP_200_OK)
         # No pk: list if admin, else return single current user's wallet as an object
         qs = self.get_queryset()
         if request.user.is_staff:
             serializer = self.get_serializer(qs, many=True)
-            # Attach Blockfrost balance for each wallet (best-effort; may be slow for many wallets)
-            data = [
-                {**item, 'balance': _get_blockfrost_balance_ada(obj.address)}
-                for item, obj in zip(serializer.data, qs)
-            ]
+            data = serializer.data
             return Response(data, status=status.HTTP_200_OK)
         # Non-admin: return the current user's wallet or 404
         try:
@@ -359,8 +317,6 @@ class WalletAPIVew(generics.GenericAPIView):
             return Response({"detail": "Wallet not found for current user."}, status=status.HTTP_404_NOT_FOUND)
         serializer = self.get_serializer(wallet)
         data = serializer.data
-        # Fetch balance from Blockfrost (simplified)
-        data['balance'] = _get_blockfrost_balance_ada(wallet.address)
         return Response(data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):

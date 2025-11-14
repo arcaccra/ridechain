@@ -227,6 +227,3 @@ DEFAULT_FROM_EMAIL = 'RideChain <' + EMAIL_HOST_USER + '>'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# BlockFrost API Key
-BLOCKFROST_API_KEY = env('BLOCKFROST_API_KEY')

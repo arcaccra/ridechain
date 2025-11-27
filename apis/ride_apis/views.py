@@ -186,7 +186,7 @@ class RideBookingValidationMixin:
             raise serializers.ValidationError("This ride is already full.")
 
         # 5. Ride must not have already departed
-        if ride.departure_time <= timezone.now():
+        if ride.status == 'In Progress':
             raise serializers.ValidationError("This ride has already departed.")
 
         # 6. Ride must not be cancelled or completed

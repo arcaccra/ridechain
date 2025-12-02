@@ -9,6 +9,8 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from .serializers import UserSerializer, UserUpdateSerializer, LoginSerializer, LogoutSerializer, DriverSerializer, WalletSerializer
 from accounts.models import User, Driver, Wallet
 from ..views import EmptySerializer
+from apis.ride_apis.urls import  RideDetailSerializer
+from rides.models import Ride
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import AllowAny
 import logging
@@ -110,14 +112,17 @@ class UserDetailView(generics.RetrieveAPIView):
         # Get the user instance. self.get_object() is available in RetrieveAPIView
         user = self.get_object()
 
-        # Add the event manager id to the response if the user is an event manager
+        # Add the driver id to the response if the user is an event manager
         if user.is_driver:
-            driver_serializer = DriverSerializer(user.driver)
+            driver_serializer = DriverSerializer(user.is_driver)
             driver_data = driver_serializer.data
             # Exclude the 'user' field from driver data
             driver_data.pop('user', None)
             response.data['driver'] = driver_data
-
+        #Add rides where user is a passenger by checking if user in ride.passengers
+        passenger_rides = Ride.objects.filter(passengers=user)
+        ride_serializer = RideDetailSerializer(passenger_rides, many=True)
+        response.data['user_rides'] = ride_serializer.data
         return response
 
 # User Update View

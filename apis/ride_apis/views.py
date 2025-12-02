@@ -1,20 +1,19 @@
 from django.urls import reverse
-from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from rest_framework import generics, permissions, status, serializers
 from rest_framework.response import Response
 from rest_framework.reverse import reverse_lazy
-from rest_framework.exceptions import PermissionDenied
 from django.core.files.base import ContentFile
 from io import BytesIO
 from django.db.models import Q
 from .serializers import RideListSerializer, RideDetailSerializer, RideUpdateSerializer, LocationSerializer, RideCreateSerializer
 from rides.models import Ride, Location
-from apis.permissions import IsUserOrReadOnly, IsDriverOrReadOnly
+from apis.permissions import IsUserOrReadOnly
 from ..views import EmptySerializer
 from book_rate.models import RideBooking
 from utilities.qr_code_module import QRCodeGenerator
-from apis.book_rate_apis.serializers import RideBookingSerializer, RideBookingDetailSerializer
+from apis.book_rate_apis.serializers import RideBookingDetailSerializer
 
 
 class LocationListView(generics.ListCreateAPIView):
@@ -244,6 +243,39 @@ class BookRideAPIView(RideBookingValidationMixin, generics.CreateAPIView):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
+@method_decorator(csrf_exempt, name='dispatch')
+class CancelRideAPIView(generics.UpdateAPIView):  # Cancel a ride booking: remove passenger from ride but keep booking record
+    serializer_class = RideUpdateSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Ride.objects.all()
+    lookup_field = 'uuid'
+    lookup_url_kwarg = 'ride_uuid'
+
+    def put(self, request, *args, **kwargs):
+        # Get the ride using the UUID from the URL via get_object()
+        ride = self.get_object()
+        user = request.user
+
+        # Only allow the passenger themselves or staff to perform this action
+        if not (ride.passengers.filter(id=user.id).exists() or user.is_staff or user.is_superuser):
+            return Response({'detail': 'You do not have permission to modify this ride.'}, status=status.HTTP_403_FORBIDDEN)
+
+        # Remove the authenticated user from the ride's passengers if present
+        try:
+            if ride.passengers.filter(id=user.id).exists():
+                ride.passengers.remove(user)
+        except Exception:
+            # If removal fails, return an error instead of continuing to update
+            return Response({'detail': 'Failed to remove passenger from ride.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # Perform a full update of the ride using RideUpdateSerializer
+        serializer = self.get_serializer(ride, data=request.data, partial=False)
+        serializer.is_valid(raise_exception=True)
+        updated_ride = serializer.save()
+
+        # Return the full ride detail representation after update
+        detail_serializer = RideDetailSerializer(updated_ride, context={'request': request})
+        return Response(detail_serializer.data, status=status.HTTP_200_OK)
 
 class BookRideVerificationAPIView(generics.GenericAPIView):
     """

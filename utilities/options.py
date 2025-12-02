@@ -33,11 +33,9 @@ VEHICLE_TYPES = (
 
 RIDE_STATUSES = (
     ('', 'Select Ride Status'),
-    ('REQUESTED', 'Requested'),
-    ('PENDING', 'Pending'),
-    ('ACCEPTED', 'Accepted'),
-    ('ENROUTE_PICKUP', 'Enroute to Pickup'),
-    ('IN_PROGRESS', 'In Progress'),
+    ('Requested', 'Requested'),
+    ('Accepted', 'Accepted'),
+    ('In Progress', 'In Progress'),
     ('COMPLETED', 'Completed'),
     ('CANCELLED', 'Cancelled'),
 )

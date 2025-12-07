@@ -46,7 +46,8 @@ ALLOWED_HOSTS = [
     'yaw959.pythonahywhere.com',
     'api.paystack.co',
     'app.arcaccra.com',
-    'cardano-preprod.blockfrost.io'
+    'cardano-preprod.blockfrost.io',
+    'ridechain-web.vercel.app'
 ]
 
 templates = os.path.join(BASE_DIR, 'templates')
@@ -173,6 +174,7 @@ CORS_ORIGIN_WHITELIST = [
     "https://api.paystack.co",  # Paystack API
     "http://localhost:5173", # Local development server for frontend
     "https://cardano-preprod.blockfrost.io", # Blockfrost API
+    "https://ridechain-web.vercel.app/", # Deployed frontend
 ]
 CORS_ALLOW_CREDENTIALS = True
 
@@ -187,6 +189,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://api.paystack.co",  # Paystack API
     "http://localhost:5173",
     "https://cardano-preprod.blockfrost.io",
+    "https://ridechain-web.vercel.app",
 ]
 
 

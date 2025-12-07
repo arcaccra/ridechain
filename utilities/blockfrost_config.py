@@ -11,8 +11,8 @@ import requests
 
 BLOCKFROST_API_KEY = settings.BLOCKFROST_API_KEY
 
-# Preview URL for Blockfrost API
-BLOCKFROST_API_URL = "https://cardano-preprod.blockfrost.io/api/v0"
+# Preview URL for Blockfrost API (use Cardano preview testnet)
+BLOCKFROST_API_URL = "https://cardano-preview.blockfrost.io/api/v0"
 
 
 class BlockfrostConfig:
@@ -49,4 +49,3 @@ class BlockfrostConfig:
     def get_transaction_endpoint(self, tx_hash):
         """Returns the endpoint URL for fetching transaction details."""
         return f"{self.api_url}/txs/{tx_hash}"
-

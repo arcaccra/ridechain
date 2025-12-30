@@ -174,7 +174,7 @@ CORS_ORIGIN_WHITELIST = [
     "https://api.paystack.co",  # Paystack API
     "http://localhost:5173", # Local development server for frontend
     "https://cardano-preprod.blockfrost.io", # Blockfrost API
-    "https://ridechain-web.vercel.app/", # Deployed frontend
+    "https://ridechain-web.vercel.app", # Deployed frontend
 ]
 CORS_ALLOW_CREDENTIALS = True
 

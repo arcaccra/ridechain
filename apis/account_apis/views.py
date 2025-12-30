@@ -157,6 +157,21 @@ class UserUpdateView(generics.UpdateAPIView):
         return self.put(request, *args, **kwargs)
 
 
+# User Delete View
+class UserDeleteView(generics.DestroyAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated, IsUserOrReadOnly | permissions.IsAdminUser]
+
+    def delete(self, request, *args, **kwargs):
+        user = self.get_object()
+        if user == request.user or request.user.is_superuser:
+            user.delete()
+            return Response({"message": "User deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+        else:
+            raise PermissionDenied("You do not have permission to delete this user.")
+
+
 # Driver List View
 class DriverListView(generics.ListCreateAPIView):
     queryset = Driver.objects.all()
@@ -446,6 +461,7 @@ class AccountRootView(generics.GenericAPIView):
             'register': reverse_lazy('user-register', request=request, format=None),
             'login': reverse_lazy('user-login', request=request, format=None),
             'logout': reverse_lazy('user-logout', request=request, format=None),
+            'delete': reverse_lazy('user-delete', kwargs={'pk': request.user.id}, request=request, format=None) if request.user.is_authenticated else None,
             'drivers': reverse_lazy('driver-list', request=request, format=None),
             'wallets': reverse_lazy('wallet-list', request=request, format=None),
         }
